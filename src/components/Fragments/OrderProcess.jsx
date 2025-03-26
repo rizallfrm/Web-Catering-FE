@@ -1,4 +1,5 @@
-import { FaClipboardCheck, FaUserCog, FaClipboardList } from 'react-icons/fa';
+import { FaClipboardCheck, FaUserCog, FaClipboardList, FaSearch } from 'react-icons/fa';
+import { Fa42Group } from 'react-icons/fa6';
 
 const OrderProcess = () => {
   const steps = [
@@ -10,13 +11,13 @@ const OrderProcess = () => {
     },
     {
       id: 2,
-      icon: <FaUserCog className="w-8 h-8"/>,
-      title: 'Konsultasi',
-      description: 'Diskusikan detail menu dengan tim Catering kami'
+      icon: <FaClipboardList className="w-8 h-8"/>,
+      title: 'Atur Tanggal',
+      description: 'Tentukan tanggal dan waktu pengantaran'
     },
     {
       id: 3,
-      icon: <FaClipboardList className="w-8 h-8"/>,
+      icon: <Fa42Group className="w-8 h-8"/>,
       title: 'Pengiriman',
       description: 'Kami antar tepat waktu ke lokasi Anda'
     }
