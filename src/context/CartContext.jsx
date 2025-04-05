@@ -1,85 +1,154 @@
-// contexts/CartContext.jsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect } from "react";
+import CartService from "../components/services/cartService";
 
 const CartContext = createContext();
 
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState({ items: [] });
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Load cart from localStorage on mount
+  // Load cart when user is authenticated
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
+    fetchCart();
   }, []);
 
-  // Save cart to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
+  const fetchCart = async () => {
+    try {
+      setIsLoading(true);
+      const cartData = await CartService.getCart();
+      console.log("Cart data received:", cartData);
 
-  const addToCart = (menuItem) => {
-    setCart(prevCart => {
-      // Check if the item already exists in the cart
-      const existingItem = prevCart.find(item => item.id === menuItem.id);
-      
-      if (existingItem) {
-        // Increment quantity of existing item
-        return prevCart.map(item => 
-          item.id === menuItem.id 
-            ? { ...item, quantity: item.quantity + 1 } 
-            : item
-        );
+      // Pastikan cartData memiliki struktur yang diharapkan
+      if (!cartData.items && Array.isArray(cartData.CartItems)) {
+        // Jika backend mengembalikan CartItems bukan items
+        setCart({
+          ...cartData,
+          items: cartData.CartItems,
+        });
       } else {
-        // Add new item with quantity 1
-        return [...prevCart, { ...menuItem, quantity: 1 }];
+        setCart({
+          ...cartData,
+          items: cartData.items || [],
+        });
       }
-    });
-    
-    // Open cart modal whenever an item is added
+
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching cart:", err);
+      setError("Failed to load cart");
+      // Reset cart items jika terjadi error
+      setCart({ items: [] });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addToCart = async (menuId, quantity = 1) => {
+    try {
+      setIsLoading(true);
+      await CartService.addItem(menuId, quantity);
+      await fetchCart();
+      return true;
+    } catch (err) {
+      console.error("Error adding to cart:", err);
+      setError("Failed to add item to cart");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const removeFromCart = async (itemId) => {
+    try {
+      setIsLoading(true);
+      await CartService.removeItem(itemId);
+      await fetchCart();
+      return true;
+    } catch (err) {
+      console.error("Error removing from cart:", err);
+      setError("Failed to remove item from cart");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateItemQuantity = async (itemId, quantity) => {
+    try {
+      setIsLoading(true);
+      await CartService.updateItemQuantity(itemId, quantity);
+      await fetchCart();
+      return true;
+    } catch (err) {
+      console.error("Error updating cart item quantity:", err);
+      setError("Failed to update item quantity");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const clearCart = async () => {
+    try {
+      setIsLoading(true);
+      setCart({ items: [] });
+      setError(null);
+      return true;
+    } catch (err) {
+      console.error("Error clearing cart:", err);
+      setError("Failed to clear cart");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const openCart = () => {
+    console.log("Opening cart...");
     setIsCartOpen(true);
   };
 
-  const updateQuantity = (id, quantity) => {
-    setCart(prevCart => 
-      prevCart.map(item => 
-        item.id === id ? { ...item, quantity } : item
-      )
-    );
+  const closeCart = () => {
+    console.log("Closing cart..."); // Debug
+
+    setIsCartOpen(false);
   };
 
-  const removeItem = (id) => {
-    setCart(prevCart => prevCart.filter(item => item.id !== id));
-  };
+  // Get total items count
+  const cartItemCount =
+    cart && cart.items && Array.isArray(cart.items)
+      ? cart.items.reduce(
+          (total, item) => total + (Number(item.quantity) || 0),
+          0
+        )
+      : 0;
 
-  const clearCart = () => {
-    setCart([]);
-  };
-
-  const openCart = () => setIsCartOpen(true);
-  const closeCart = () => setIsCartOpen(false);
-
-  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
-
-  const value = {
-    cart,
-    addToCart,
-    updateQuantity,
-    removeItem,
-    clearCart,
-    isCartOpen,
-    openCart,
-    closeCart,
-    cartItemCount
-  };
+  console.log("Current cart items:", cart.items, "Count:", cartItemCount);
 
   return (
-    <CartContext.Provider value={value}>
+    <CartContext.Provider
+      value={{
+        cart,
+        isCartOpen,
+        isLoading,
+        error,
+        cartItemCount,
+        fetchCart,
+        addToCart,
+        removeFromCart,
+        updateItemQuantity,
+        clearCart,
+        openCart,
+        closeCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
 };
+
+export default CartContext;
