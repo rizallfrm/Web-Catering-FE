@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MenuService from '../services/menuService';
 import { useCart } from '../../context/CartContext';
+import AuthService from '../services/authService';
 
 const Menu = () => {
   const [menus, setMenus] = useState([]);
@@ -9,13 +10,32 @@ const Menu = () => {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const { addToCart, openCart } = useCart();
+  const { addItem, openCart } = useCart(); // Changed from addToCart to addItem
   const navigate = useNavigate();
   
   const [addingToCart, setAddingToCart] = useState(false);
   const [addedItemId, setAddedItemId] = useState(null);
   // State untuk menampilkan notifikasi
   const [notification, setNotification] = useState(null);
+  // Check if user is logged in
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check login status
+    const checkLoginStatus = () => {
+      const isAuthenticated = AuthService.isAuthenticated();
+      setIsLoggedIn(isAuthenticated);
+    };
+    
+    checkLoginStatus();
+    
+    // Add event listener for storage changes to detect login/logout
+    window.addEventListener('storage', checkLoginStatus);
+    
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchMenus = async () => {
@@ -53,6 +73,16 @@ const Menu = () => {
 
   const handleAddToCart = async (menu) => {
     try {
+      // Check if user is logged in
+      if (!isLoggedIn) {
+        setNotification("Silakan login terlebih dahulu untuk menambahkan ke keranjang");
+        setTimeout(() => {
+          setNotification(null);
+          navigate('/login'); // Redirect to login page
+        }, 2000);
+        return;
+      }
+      
       const menuId = menu.id;
       if (!menu.id || typeof menu.id !== 'string') {
         console.error("Invalid menu ID:", menu.id);
@@ -61,20 +91,48 @@ const Menu = () => {
       }
       
       console.log("Adding menu with ID:", menu.id);
-      await addToCart(menu.id, 1);
+      
+      // Set loading state
+      setAddingToCart(true);
+      setAddedItemId(menu.id);
+      
+      // Use addItem instead of addToCart
+      await addItem(menu.id, 1);
       
       // Tampilkan notifikasi
       setNotification(`${menu.name} ditambahkan ke keranjang`);
+      
+      // Reset loading state
+      setAddingToCart(false);
+      setAddedItemId(null);
+      
       setTimeout(() => {
         setNotification(null);
       }, 3000);
       
     } catch (error) {
       console.error("Error adding to cart:", error);
+      setNotification("Gagal menambahkan ke keranjang. Silakan coba lagi.");
+      
+      // Reset loading state
+      setAddingToCart(false);
+      setAddedItemId(null);
+      
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
     }
   };
 
   const goToMyOrders = () => {
+    if (!isLoggedIn) {
+      setNotification("Silakan login terlebih dahulu untuk melihat pesanan");
+      setTimeout(() => {
+        setNotification(null);
+        navigate('/login');
+      }, 2000);
+      return;
+    }
     navigate('/my-orders');
   };
 
@@ -103,27 +161,12 @@ const Menu = () => {
               Pesanan Saya
             </button>
           </div>
-          
-          <div>
-            <label className="mr-2">Kategori:</label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="p-3 border rounded-md"
-            >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category === 'all' ? 'Semua' : category}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
       </div>
       
       {/* Notifikasi */}
       {notification && (
-        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
           {notification}
         </div>
       )}
@@ -179,9 +222,14 @@ const Menu = () => {
                     <span className="text-lg font-bold text-yellow-600">Rp {menu.price.toLocaleString()}</span>
                     <button
                       onClick={() => handleAddToCart(menu)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md transition-colors duration-300"
+                      disabled={addingToCart && addedItemId === menu.id}
+                      className={`
+                        ${addingToCart && addedItemId === menu.id
+                          ? 'bg-gray-400'
+                          : 'bg-yellow-500 hover:bg-yellow-600'
+                        } text-white px-3 py-1 rounded-md transition-colors duration-300`}
                     >
-                      + Keranjang
+                      {addingToCart && addedItemId === menu.id ? 'Loading...' : '+ Keranjang'}
                     </button>
                   </div>
                 </div>

@@ -4,18 +4,22 @@ import NavLink from "../Elements/NavLink";
 import AuthService from "../services/authService";
 import { useCart } from "../../context/CartContext";
 import CartModal from "../Elements/cartModal";
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
-  const { cartItemCount, openCart, isCartOpen, closeCart } = useCart();
+  const { cartItemCount, openCart, isCartOpen, closeCart, clearCart } = useCart();
   const navigate = useNavigate();
-  // Cek status login saat komponen dimuat
+
+  // Check login status when component mounts and when auth state changes
   useEffect(() => {
     try {
       const checkLoginStatus = () => {
         const currentUser = AuthService.getCurrentUser();
-        if (currentUser) {
+        const isAuthenticated = AuthService.isAuthenticated();
+        
+        if (currentUser && isAuthenticated) {
           setIsLoggedIn(true);
           setUser(currentUser);
         } else {
@@ -25,6 +29,17 @@ const Header = () => {
       };
 
       checkLoginStatus();
+      
+      // Optional: Add event listener for storage changes
+      const handleStorageChange = () => {
+        checkLoginStatus();
+      };
+      
+      window.addEventListener('storage', handleStorageChange);
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+      };
     } catch (error) {
       console.error("Error checking login status:", error);
       setIsLoggedIn(false);
@@ -32,30 +47,30 @@ const Header = () => {
     }
   }, []);
 
-  // Fungsi untuk mendapatkan tampilan user (initial atau nama)
+  // Function to get user display initial
   const getUserDisplay = () => {
     if (!user) return "U";
 
-    // Jika user memiliki name, gunakan inisial
+    // If user has name, use initial
     if (user.name && typeof user.name === "string") {
       return user.name.charAt(0).toUpperCase();
     }
 
-    // Jika user memiliki email, gunakan karakter pertama email
+    // If user has email, use first character of email
     if (user.email && typeof user.email === "string") {
       return user.email.charAt(0).toUpperCase();
     }
 
-    // Jika user memiliki id, gunakan karakter pertama id
+    // If user has id, use first character of id
     if (user.id && typeof user.id === "string") {
       return user.id.charAt(0).toUpperCase();
     }
 
-    // Fallback ke 'A' untuk Admin atau 'U' untuk User
+    // Fallback to 'A' for Admin or 'U' for User
     return user.role === "admin" ? "A" : "U";
   };
 
-  // Fungsi untuk mendapatkan nama display
+  // Function to get display name
   const getDisplayName = () => {
     if (!user) return "User";
 
@@ -72,32 +87,40 @@ const Header = () => {
     return user.role === "admin" ? "Admin" : "User";
   };
 
-  // Fungsi untuk toggle menu mobile
+  // Function to toggle mobile menu
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Fungsi untuk handle logout
+  // Function to handle logout
   const handleLogout = () => {
     try {
+      // Clear cart first
+      clearCart();
+      
+      // Then logout the user
       AuthService.logout();
+      
+      // Update local state
       setIsLoggedIn(false);
       setUser(null);
       setShowUserMenu(false);
-      navigate("/");
+      
+      // Redirect to login page
+      navigate("/login");
     } catch (error) {
       console.error("Error during logout:", error);
     }
   };
 
-  // Dropdown menu untuk user profile
+  // Dropdown menu for user profile
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const toggleUserMenu = () => {
     setShowUserMenu(!showUserMenu);
   };
 
-  // Menutup dropdown jika user mengklik di luar dropdown
+  // Close dropdown if user clicks outside dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showUserMenu && !event.target.closest(".user-menu-container")) {
@@ -143,33 +166,35 @@ const Header = () => {
           <NavLink to="/tentang-kami">Tentang Kami</NavLink>
           <NavLink to="/kontak">Kontak</NavLink>
 
-          {/* Keranjang Button */}
-          <button
-            onClick={openCart}
-            className="relative transition-transform duration-200 hover:scale-110"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          {/* Cart Button - Only show if logged in */}
+          {isLoggedIn && (
+            <button
+              onClick={openCart}
+              className="relative transition-transform duration-200 hover:scale-110"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-              />
-            </svg>
-            {cartItemCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                {cartItemCount}
-              </span>
-            )}
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+              {cartItemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  {cartItemCount}
+                </span>
+              )}
+            </button>
+          )}
 
-          {/* Login Button atau User Icon */}
+          {/* Login Button or User Icon */}
           {!isLoggedIn ? (
             <Link
               to="/login"
@@ -216,7 +241,7 @@ const Header = () => {
                         Pesanan Saya
                       </Link>
 
-                      {/* Tampilkan link Admin Dashboard jika user adalah admin */}
+                      {/* Show Admin Dashboard link if user is admin */}
                       {user?.role === "admin" && (
                         <Link
                           to="/admin"
@@ -279,37 +304,39 @@ const Header = () => {
                 Kontak
               </NavLink>
 
-              {/* Keranjang untuk Mobile */}
-              <button
-                onClick={() => {
-                  openCart();
-                  setIsMenuOpen(false);
-                }}
-                className="flex items-center py-2"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 mr-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+              {/* Cart for Mobile - Only show if logged in */}
+              {isLoggedIn && (
+                <button
+                  onClick={() => {
+                    openCart();
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center py-2"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-                Keranjang
-                {cartItemCount > 0 && (
-                  <span className="ml-2 bg-yellow-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                    {cartItemCount}
-                  </span>
-                )}
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                  Keranjang
+                  {cartItemCount > 0 && (
+                    <span className="ml-2 bg-yellow-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {cartItemCount}
+                    </span>
+                  )}
+                </button>
+              )}
 
-              {/* Login/Profile untuk Mobile */}
+              {/* Login/Profile for Mobile */}
               {!isLoggedIn ? (
                 <Link
                   to="/login"
@@ -356,7 +383,7 @@ const Header = () => {
                     Pesanan Saya
                   </Link>
 
-                  {/* Tampilkan link Admin Dashboard di mobile jika user adalah admin */}
+                  {/* Show Admin Dashboard link in mobile if user is admin */}
                   {user?.role === "admin" && (
                     <Link
                       to="/admin"
@@ -417,8 +444,8 @@ const Header = () => {
         )}
       </div>
 
-      {/* Cart Modal */}
-      <CartModal isOpen={isCartOpen} onClose={closeCart} />
+      {/* Cart Modal - Only render if logged in */}
+      {isLoggedIn && <CartModal isOpen={isCartOpen} onClose={closeCart} />}
     </header>
   );
 };
