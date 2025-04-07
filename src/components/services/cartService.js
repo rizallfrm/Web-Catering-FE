@@ -1,22 +1,26 @@
 import API from "./api";
+import AuthService from "./authService";
 
 const CartService = {
   getCart: async () => {
+    // Check if user is authenticated before making API call
+    if (!AuthService.isAuthenticated()) {
+      console.log('User not authenticated, returning empty cart');
+      return { items: [] };
+    }
+    
     try {
       const response = await API.get("/carts");
 
-      // Log response untuk debugging
-      console.log("Raw cart response:", response.data);
-
-      // Normalisasi respons
+      // Normalize response
       const normalizedData = response.data;
 
-      // Jika ada CartItems tapi tidak ada items, gunakan CartItems sebagai items
+      // If there are CartItems but no items, use CartItems as items
       if (!normalizedData.items && normalizedData.CartItems) {
         normalizedData.items = normalizedData.CartItems;
       }
 
-      // Pastikan ada array items
+      // Ensure there's an array of items
       if (!normalizedData.items) {
         normalizedData.items = [];
       }
@@ -24,13 +28,25 @@ const CartService = {
       return normalizedData;
     } catch (error) {
       console.error("Error in getCart:", error);
+      
+      // If 401 error, return empty cart instead of throwing
+      if (error.response && error.response.status === 401) {
+        return { items: [] };
+      }
+      
       throw error;
     }
   },
 
   addItem: async (menu_id, quantity = 1) => {
+    // Check if user is authenticated before making API call
+    if (!AuthService.isAuthenticated()) {
+      console.log('User not authenticated, cannot add item to cart');
+      throw new Error('You must be logged in to add items to cart');
+    }
+    
     try {
-      // Pastikan menu_id adalah string, bukan objek
+      // Ensure menu_id is a string, not an object
       const menuIdString = typeof menu_id === "object" ? menu_id.id : menu_id;
 
       const response = await API.post("/carts/add", {
@@ -46,6 +62,12 @@ const CartService = {
   },
 
   removeItem: async (itemId) => {
+    // Check if user is authenticated before making API call
+    if (!AuthService.isAuthenticated()) {
+      console.log('User not authenticated, cannot remove item from cart');
+      throw new Error('You must be logged in to remove items from cart');
+    }
+    
     try {
       const response = await API.delete(`/carts/item/${itemId}`);
       return response.data;
@@ -55,8 +77,14 @@ const CartService = {
   },
 
   updateItemQuantity: async (itemId, quantity) => {
+    // Check if user is authenticated before making API call
+    if (!AuthService.isAuthenticated()) {
+      console.log('User not authenticated, cannot update cart');
+      throw new Error('You must be logged in to update cart');
+    }
+    
     try {
-      // Since there's no direct update endpoint, we'll implement a workaround
+      // Since there's no direct update endpoint, implement a workaround
       // First, get the current cart to find the menu_id for this item
       const cart = await CartService.getCart();
       const item = cart.items.find((item) => item.id === itemId);

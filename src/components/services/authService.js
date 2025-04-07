@@ -33,6 +33,7 @@ const AuthService = {
   logout: () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("cart");
   },
 
   register: async (userData) => {

@@ -1,21 +1,23 @@
 import axios from 'axios';
 
-// Buat axios instance
+// Create an axios instance
 const API = axios.create({
-  baseURL: 'http://localhost:3000/api', // URL yang benar sesuai dengan endpoint Anda
-  timeout: 10000,
+  baseURL:'http://localhost:3000/api',
   headers: {
     'Content-Type': 'application/json',
-  }
+  },
 });
 
-// Interceptor untuk menambahkan token ke header
+// Add a request interceptor to include auth token in headers
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+    
+    // Only add the token if it exists
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+    
     return config;
   },
   (error) => {
@@ -23,18 +25,30 @@ API.interceptors.request.use(
   }
 );
 
-// Interceptor untuk handling response
+// Add a response interceptor to handle auth errors
 API.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
+    // If we get a 401 error (unauthorized), clear the token
     if (error.response && error.response.status === 401) {
-      // Handle token expired atau unauthorized
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Don't auto-logout if we're already on login page or trying to login
+      const isLoginRequest = error.config.url.includes('/login');
+      const isLoginPage = window.location.pathname.includes('/login');
+      
+      if (!isLoginRequest && !isLoginPage) {
+        console.log('Unauthorized access - clearing auth data');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        
+        // Redirect to login page (if not already there)
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
+      }
     }
+    
     return Promise.reject(error);
   }
 );
