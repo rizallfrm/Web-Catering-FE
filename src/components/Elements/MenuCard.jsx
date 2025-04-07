@@ -2,13 +2,13 @@ import React from 'react';
 
 const MenuCard = ({ menu, addToCart }) => {
   return (
-    <div className="bg-red rounded-lg shadow-xl overflow-hidden">
+    <div className="bg-red hover:shadow-lg  overflow-hidden">
       <img 
         src={menu.image} 
         alt={menu.name} 
         className="w-full h-48 object-cover"
       />
-      <div className="p-4">
+      <div className="p-4 ">
         <h3 className="font-semibold text-lg">{menu.name}</h3>
         <p className="text-gray-600 text-sm mt-1">{menu.description}</p>
         <div className="mt-4 flex justify-between items-center">
