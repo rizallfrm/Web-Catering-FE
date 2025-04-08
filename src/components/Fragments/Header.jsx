@@ -137,9 +137,20 @@ const Header = () => {
   return (
     <header className="bg-white shadow-md py-4">
       <div className="container mx-auto px-4 flex justify-between items-center">
-        <Link to="/" className="font-bold text-xl text-yellow-600">
-          Resto App
-        </Link>
+        {/* Logo and Brand */}
+        <div className="flex items-center space-x-4">
+          <img 
+            className="h-16 w-16 object-contain" 
+            src="/src/assets/images/logo.png" 
+            alt="Mamake Logo" 
+          />
+          <Link 
+            to="/" 
+            className="font-bold text-xl text-yellow-600 hover:text-yellow-700 transition-colors"
+          >
+            Dapur Mamake
+          </Link>
+        </div>
 
         {/* Mobile Menu Button */}
         <button className="md:hidden" onClick={toggleMenu}>

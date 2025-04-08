@@ -38,15 +38,15 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-xl sm:text-4xl py-10 font-bold mb-4">
+        <div className="max-w-3xl mx-auto py-14">
+          <h1 className="text-xl sm:text-4xl font-bold mb-4">
             Catering Lezat untuk Setiap Acara
           </h1>
           <p className="text-lg mb-8">
             Hidangan berkualitas prima dengan rasa spesial untuk Anda
           </p>
           <Link to="/menu">
-            <Button primary>Pesan Sekarang</Button>
+            <Button className="hover:bg-gray-300" primary>Pesan Sekarang</Button>
           </Link>
         </div>
       </div>
