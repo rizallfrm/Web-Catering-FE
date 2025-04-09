@@ -5,7 +5,7 @@ import MenuSection from "../Fragments/MenuSection";
 import OrderProcess from "../Fragments/OrderProcess";
 import PriceCalculator from "../Fragments/PriceCalculate";
 import TestimonialSection from "../Fragments/TestimonialSection";
-const nomorWhatsApp = "6289527308651"; // Nomor dari logo Mamake
+const nomorWhatsApp = "6289527308651";
 
 const bukaWhatsApp = () => {
   window.open(`https://wa.me/${nomorWhatsApp}`, "_blank");
