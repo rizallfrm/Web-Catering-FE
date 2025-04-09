@@ -16,7 +16,7 @@ const AuthLayout = ({ children, title }) => {
           <Link to="/">
             <img 
               className="h-36 w-36 mx-auto mb-2" 
-              src="/src/assets/images/logo.svg" 
+              src="/src/assets/images/logo.png" 
               alt="Dapur Mamake"
             />
             <h1 className="text-4xl font-bold text-yellow-400 drop-shadow-lg">
