@@ -19,8 +19,8 @@ const AuthLayout = ({ children, title }) => {
               src="/src/assets/images/logo.png" 
               alt="Dapur Mamake"
             />
-            <h1 className="text-4xl font-bold text-yellow-400 drop-shadow-lg">
-              Dapur Mamake
+            <h1 className="text-3xl font-bold text-yellow-400 drop-shadow-lg">
+              Dapur Catering Mamake
             </h1>
             <p className="mt-2 text-white font-medium drop-shadow-md">
               Rasanya seperti masakan rumah, hangatnya seperti pelukan ibu
