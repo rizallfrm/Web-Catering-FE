@@ -9,7 +9,8 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
-  const { cartItemCount, openCart, isCartOpen, closeCart, clearCart } = useCart();
+  const { cartItemCount, openCart, isCartOpen, closeCart, clearCart } =
+    useCart();
   const navigate = useNavigate();
 
   // Check login status when component mounts and when auth state changes
@@ -18,7 +19,7 @@ const Header = () => {
       const checkLoginStatus = () => {
         const currentUser = AuthService.getCurrentUser();
         const isAuthenticated = AuthService.isAuthenticated();
-        
+
         if (currentUser && isAuthenticated) {
           setIsLoggedIn(true);
           setUser(currentUser);
@@ -29,16 +30,16 @@ const Header = () => {
       };
 
       checkLoginStatus();
-      
+
       // Optional: Add event listener for storage changes
       const handleStorageChange = () => {
         checkLoginStatus();
       };
-      
-      window.addEventListener('storage', handleStorageChange);
-      
+
+      window.addEventListener("storage", handleStorageChange);
+
       return () => {
-        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener("storage", handleStorageChange);
       };
     } catch (error) {
       console.error("Error checking login status:", error);
@@ -97,15 +98,15 @@ const Header = () => {
     try {
       // Clear cart first
       clearCart();
-      
+
       // Then logout the user
       AuthService.logout();
-      
+
       // Update local state
       setIsLoggedIn(false);
       setUser(null);
       setShowUserMenu(false);
-      
+
       // Redirect to login page
       navigate("/login");
     } catch (error) {
@@ -139,16 +140,16 @@ const Header = () => {
       <div className="container mx-auto px-4 flex justify-between items-center">
         {/* Logo and Brand */}
         <div className="flex items-center space-x-4">
-          <img 
-            className="h-16 w-16 object-contain" 
-            src="/src/assets/images/logo.png" 
-            alt="Mamake Logo" 
+          <img
+            className="h-16 w-16 object-contain"
+            src="/src/assets/images/logo.png"
+            alt="Mamake Logo"
           />
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="font-bold text-xl text-yellow-600 hover:text-yellow-700 transition-colors"
           >
-            Dapur Mamake
+            Dapur Catering Mamake
           </Link>
         </div>
 
@@ -209,8 +210,24 @@ const Header = () => {
           {!isLoggedIn ? (
             <Link
               to="/login"
-              className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-md transition-colors duration-300"
+              onClick={() => setIsMenuOpen(false)}
+              className="flex items-center group bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
             >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-2 transition-transform duration-300 group-hover:translate-x-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                style={{ transform: "scaleX(-1)" }}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17.25 12H6.75m0 0l4.5-4.5M6.75 12l4.5 4.5"
+                />
+              </svg>
               Masuk
             </Link>
           ) : (
@@ -349,27 +366,29 @@ const Header = () => {
 
               {/* Login/Profile for Mobile */}
               {!isLoggedIn ? (
-                <Link
-                  to="/login"
-                  className="flex items-center py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
-                    />
-                  </svg>
-                  Masuk
-                </Link>
+        <Link
+        to="/login"
+        onClick={() => setIsMenuOpen(false)}
+        className="flex items-center group bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5 mr-2 transition-transform duration-300 group-hover:translate-x-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          style={{ transform: "scaleX(-1)" }}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M17.25 12H6.75m0 0l4.5-4.5M6.75 12l4.5 4.5"
+          />
+        </svg>
+        Masuk
+      </Link>
+      
               ) : (
                 <>
                   <Link
