@@ -108,7 +108,7 @@ const MenuManagement = () => {
         } catch (uploadErr) {
           console.error("Error uploading image:", uploadErr);
           // Gunakan placeholder sederhana jika error
-          imageUrl = 'https://via.placeholder.com/300x200';
+          imageUrl ="https://placehold.co/300x200/FFD700/000000?text=dinner-table";
         }
       }
       
