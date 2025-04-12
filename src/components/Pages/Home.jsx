@@ -3,7 +3,6 @@ import FAQAccordion from "../Fragments/FAQAccordion";
 import Hero from "../Fragments/Hero";
 import MenuSection from "../Fragments/MenuSection";
 import OrderProcess from "../Fragments/OrderProcess";
-import PriceCalculator from "../Fragments/PriceCalculate";
 import TestimonialSection from "../Fragments/TestimonialSection";
 const nomorWhatsApp = "6289527308651";
 
@@ -19,7 +18,6 @@ const Home = () => {
       <OrderProcess />
       <FAQAccordion/>
       <CateringAccordion/>
-      <PriceCalculator/>
       <TestimonialSection />{" "}
       <button
         title="WhatsApp Me"
