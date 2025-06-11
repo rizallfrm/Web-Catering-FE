@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Star, Quote, ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';
-import avatar1 from '../../assets/images/avatar1.jpg';
-import avatar2 from '../../assets/images/avatar2.jpg';
+import avatar1 from '../../../public/avatar1.jpg';
+import avatar2 from '../../../public/avatar2.jpg';
 
 // Expanded testimonials array with more detailed content
 const allTestimonials = [

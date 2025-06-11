@@ -137,12 +137,12 @@ const Header = () => {
 
   return (
     <header className="bg-white shadow-md py-4">
-      <div className="container mx-auto px-4 flex justify-between items-center">
+      <div className="container  mx-auto px-4 flex justify-between items-center">
         {/* Logo and Brand */}
         <div className="flex items-center space-x-4">
           <img
-            className="h-16 w-16 object-contain"
-            src="/src/assets/images/logo.png"
+            className="h-12 w-12 object-contain"
+            src="/public/logo.png"
             alt="Mamake Logo"
           />
           <Link

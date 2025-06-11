@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import Card from '../Elements/Card';
-import menu1 from '../../assets/images/menu1.jpg';
-import menu2 from '../../assets/images/menu2.jpg';
-import menu3 from '../../assets/images/menu3.jpg';
+import menu1 from '../../../public/menu1.jpg';
+import menu2 from '../../../public/menu2.jpg';
+import menu3 from '../../../public/menu3.jpg';
 import { Link } from 'react-router-dom';
 
 const categories = [

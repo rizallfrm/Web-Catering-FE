@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import Button from "../Elements/Button";
 
 const images = [
-  "/src/assets/images/hero-bg.jpg",
-  "/src/assets/images/hero-bg2.jpg",
-  "/src/assets/images/hero-bg3.jpg",
+  "/public/hero-bg.jpg",
+  "/public/hero-bg2.jpg",
+  "/public/hero-bg3.jpg",
 ];
 
 const Hero = () => {
