@@ -4,12 +4,14 @@ import NavLink from "../Elements/NavLink";
 import AuthService from "../services/authService";
 import { useCart } from "../../context/CartContext";
 import CartModal from "../Elements/cartModal";
+import toast from "react-hot-toast";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
-  const { cartItemCount, openCart, isCartOpen, closeCart, clearCart } = useCart();
+  const { cartItemCount, openCart, isCartOpen, closeCart, clearCart } =
+    useCart();
   const navigate = useNavigate();
 
   // Check login status when component mounts and when auth state changes
@@ -18,7 +20,7 @@ const Header = () => {
       const checkLoginStatus = () => {
         const currentUser = AuthService.getCurrentUser();
         const isAuthenticated = AuthService.isAuthenticated();
-        
+
         if (currentUser && isAuthenticated) {
           setIsLoggedIn(true);
           setUser(currentUser);
@@ -29,16 +31,16 @@ const Header = () => {
       };
 
       checkLoginStatus();
-      
+
       // Optional: Add event listener for storage changes
       const handleStorageChange = () => {
         checkLoginStatus();
       };
-      
-      window.addEventListener('storage', handleStorageChange);
-      
+
+      window.addEventListener("storage", handleStorageChange);
+
       return () => {
-        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener("storage", handleStorageChange);
       };
     } catch (error) {
       console.error("Error checking login status:", error);
@@ -97,17 +99,19 @@ const Header = () => {
     try {
       // Clear cart first
       clearCart();
-      
+
       // Then logout the user
       AuthService.logout();
-      
+      toast.success("Logout berhasil");
       // Update local state
       setIsLoggedIn(false);
       setUser(null);
       setShowUserMenu(false);
-      
+
       // Redirect to login page
-      navigate("/login");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -135,20 +139,21 @@ const Header = () => {
   }, [showUserMenu]);
 
   return (
-    <header className="bg-white shadow-md py-4">
-      <div className="container mx-auto px-4 flex justify-between items-center">
+    <header className="bg-white shadow-md ">
+      <div className="container  mx-auto px-4 flex justify-between items-center ">
         {/* Logo and Brand */}
-        <div className="flex items-center space-x-4">
-          <img 
-            className="h-16 w-16 object-contain" 
-            src="/src/assets/images/logo.png" 
-            alt="Mamake Logo" 
+        <div className="flex items-center space-x-3">
+          <img
+            src="/logo.png"
+            alt="Mamake Logo"
+            className="h-20  sm:h-28 md:h-36 lg:h-44 w-auto object-contain -m-2 sm:-m-2 md:-m-2 lg:-m-4 xl:-m-10
+ transition-transform duration-300 hover:scale-105 "
           />
-          <Link 
-            to="/" 
-            className="font-bold text-xl text-yellow-600 hover:text-yellow-700 transition-colors"
+          <Link
+            to="/"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-yellow-600 hover:text-yellow-700"
           >
-            Dapur Mamake
+            Dapur Catering Mamake
           </Link>
         </div>
 
@@ -209,9 +214,28 @@ const Header = () => {
           {!isLoggedIn ? (
             <Link
               to="/login"
-              className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-md transition-colors duration-300"
+              className="relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-medium text-yellow-600 transition duration-300 ease-out rounded-full shadow-lg group"
             >
-              Masuk
+              <span className="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-yellow-500 group-hover:translate-x-0 ease">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </span>
+              <span className="absolute flex items-center justify-center w-full h-full text-yellow-600 transition-all duration-300 transform group-hover:translate-x-full ease">
+                Masuk
+              </span>
+              <span className="relative invisible">Masuk</span>
             </Link>
           ) : (
             <div className="relative user-menu-container">
@@ -351,21 +375,22 @@ const Header = () => {
               {!isLoggedIn ? (
                 <Link
                   to="/login"
-                  className="flex items-center py-2"
                   onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center group bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 mr-2"
+                    className="h-5 w-5 mr-2 transition-transform duration-300 group-hover:translate-x-1"
                     fill="none"
                     viewBox="0 0 24 24"
+                    strokeWidth={1.5}
                     stroke="currentColor"
+                    style={{ transform: "scaleX(-1)" }}
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                      d="M17.25 12H6.75m0 0l4.5-4.5M6.75 12l4.5 4.5"
                     />
                   </svg>
                   Masuk

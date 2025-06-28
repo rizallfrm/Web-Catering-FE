@@ -63,7 +63,7 @@ const MenuService = {
     } catch (error) {
       console.error('Error uploading image:', error);
       // Fallback ke placeholder jika upload gagal - gunakan URL pendek
-      return { url: `https://via.placeholder.com/300x200/FFD700/000000?text=${encodeURIComponent(file.name || 'menu')}`.substring(0, 250) };
+      return { url:  `https://placehold.co/300x200/FFD700/000000?text=${encodeURIComponent(file.name || 'menu')}`.substring(0, 250)  };
     }
   }
 };

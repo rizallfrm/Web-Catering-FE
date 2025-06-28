@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import MenuService from "../services/menuService";
 import { useCart } from "../../context/CartContext";
 import AuthService from "../services/authService";
+import toast from "react-hot-toast";
 
 const Menu = () => {
   const [menus, setMenus] = useState([]);
@@ -97,20 +98,18 @@ const Menu = () => {
     try {
       // Check if user is logged in
       if (!isLoggedIn) {
-        setNotification(
-          "Silakan login terlebih dahulu untuk menambahkan ke keranjang"
-        );
+       toast.error('Silakan login terlebih dahulu untuk menambahkan ke keranjang.');
         setTimeout(() => {
           setNotification(null);
-          navigate("/login"); // Redirect to login page
-        }, 2000);
+          navigate("/login"); 
+        }, 1000);
         return;
       }
 
       const menuId = menu.id;
       if (!menu.id || typeof menu.id !== "string") {
         console.error("Invalid menu ID:", menu.id);
-        setNotification("Gagal menambahkan ke keranjang: ID menu tidak valid");
+        toast.error("Gagal menambahkan ke keranjang: ID menu tidak valid");
         return;
       }
 
