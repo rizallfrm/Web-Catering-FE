@@ -136,18 +136,19 @@ const Header = () => {
   }, [showUserMenu]);
 
   return (
-    <header className="bg-white shadow-md py-4">
-      <div className="container  mx-auto px-4 flex justify-between items-center">
+    <header className="bg-white shadow-md ">
+      <div className="container  mx-auto px-4 flex justify-between items-center ">
         {/* Logo and Brand */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
           <img
-            className="h-12 w-12 object-contain"
-            src="/public/logo.png"
+            src="/logo.png"
             alt="Mamake Logo"
+            className="h-20 sm:h-28 md:h-36 lg:h-44 w-auto object-contain -m-2 sm:-m-2 md:-m-2 lg:-m-4 xl:-m-10
+ transition-transform duration-300 hover:scale-105 "
           />
           <Link
             to="/"
-            className="font-bold text-xl text-yellow-600 hover:text-yellow-700 transition-colors"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-yellow-600 hover:text-yellow-700"
           >
             Dapur Catering Mamake
           </Link>
@@ -208,27 +209,30 @@ const Header = () => {
 
           {/* Login Button or User Icon */}
           {!isLoggedIn ? (
-            <Link
+         <Link
               to="/login"
-              onClick={() => setIsMenuOpen(false)}
-              className="flex items-center group bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
+              className="relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-medium text-yellow-600 transition duration-300 ease-out rounded-full shadow-lg group"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-2 transition-transform duration-300 group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                style={{ transform: "scaleX(-1)" }}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M17.25 12H6.75m0 0l4.5-4.5M6.75 12l4.5 4.5"
-                />
-              </svg>
-              Masuk
+              <span className="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-yellow-500 group-hover:translate-x-0 ease">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </span>
+              <span className="absolute flex items-center justify-center w-full h-full text-yellow-600 transition-all duration-300 transform group-hover:translate-x-full ease">
+                Masuk
+              </span>
+              <span className="relative invisible">Masuk</span>
             </Link>
           ) : (
             <div className="relative user-menu-container">
@@ -366,29 +370,28 @@ const Header = () => {
 
               {/* Login/Profile for Mobile */}
               {!isLoggedIn ? (
-        <Link
-        to="/login"
-        onClick={() => setIsMenuOpen(false)}
-        className="flex items-center group bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 mr-2 transition-transform duration-300 group-hover:translate-x-1"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          style={{ transform: "scaleX(-1)" }}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M17.25 12H6.75m0 0l4.5-4.5M6.75 12l4.5 4.5"
-          />
-        </svg>
-        Masuk
-      </Link>
-      
+                <Link
+                  to="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center group bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 transition-transform duration-300 group-hover:translate-x-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    style={{ transform: "scaleX(-1)" }}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17.25 12H6.75m0 0l4.5-4.5M6.75 12l4.5 4.5"
+                    />
+                  </svg>
+                  Masuk
+                </Link>
               ) : (
                 <>
                   <Link
