@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const AuthLayout = ({ children, title }) => {
   return (
     <div className="min-h-screen w-full bg-cover bg-center flex justify-center items-center py-12 px-4"
-         style={{ backgroundImage: "url('/src/assets/images/menu1.jpg')" }}>
+         style={{ backgroundImage: "url('/public/menu1.jpg')" }}>
       
       {/* Overlay gelap untuk memastikan konten di atasnya terbaca */}
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
@@ -12,11 +12,11 @@ const AuthLayout = ({ children, title }) => {
       {/* Container Form dengan efek glass */}
       <div className="z-10 w-full max-w-md">
         {/* Logo dengan ukuran yang lebih seimbang */}
-        <div className="mb-6 text-center">
+         <div className="mb-6 text-center">
           <Link to="/">
             <img 
-              className="h-36 w-36 mx-auto mb-2" 
-              src="/public/logo.png" 
+              className="h-80 w-auto mx-auto -mb-20"
+              src="/public/logo.png"
               alt="Dapur Mamake"
             />
             <h1 className="text-3xl font-bold text-yellow-400 drop-shadow-lg">
