@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import AuthService from "../services/authService";
 import AuthLayout from "./AuthLayout";
+import toast from "react-hot-toast";
 
 const Register = () => {
   const {
@@ -34,21 +35,30 @@ const Register = () => {
 
       // Use AuthService for registration
       await AuthService.register(userData);
-      
+      toast.success("Pendaftaran berhasil! Silahkan login");
+      setTimeout(() => {
+        navigate("/login", {
+          state: {
+            message: "Pendaftaran berhasil! Silakan login dengan akun Anda.",
+          },
+        });
+      }, 3000);
+
       // Redirect to login page with success message
-      navigate("/login", {
-        state: {
-          message: "Pendaftaran berhasil! Silakan login dengan akun Anda.",
-        },
-      });
     } catch (error) {
       console.error("Registration error:", error);
-      
+
       // Handle specific API error messages if available
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         setRegisterError(error.response.data.message);
       } else {
-        setRegisterError("Terjadi kesalahan saat pendaftaran. Silakan coba lagi.");
+        setRegisterError(
+          "Terjadi kesalahan saat pendaftaran. Silakan coba lagi."
+        );
       }
     } finally {
       setIsLoading(false);
@@ -130,9 +140,7 @@ const Register = () => {
             })}
           />
           {errors.email && (
-            <p className="mt-1 text-sm text-red-600">
-              {errors.email.message}
-            </p>
+            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
           )}
         </div>
 
@@ -159,9 +167,7 @@ const Register = () => {
             })}
           />
           {errors.phone && (
-            <p className="mt-1 text-sm text-red-600">
-              {errors.phone.message}
-            </p>
+            <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
           )}
         </div>
 
@@ -210,8 +216,7 @@ const Register = () => {
             }`}
             {...register("passwordConfirm", {
               required: "Konfirmasi password wajib diisi",
-              validate: (value) =>
-                value === password || "Password tidak cocok",
+              validate: (value) => value === password || "Password tidak cocok",
             })}
           />
           {errors.passwordConfirm && (
@@ -232,7 +237,6 @@ const Register = () => {
           />
           <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
             Saya menyetujui syarat dan ketentuan
-            
           </label>
         </div>
         {errors.terms && (
@@ -281,7 +285,10 @@ const Register = () => {
       <div className="mt-6">
         <p className="text-center text-sm text-gray-600">
           Sudah punya akun?{" "}
-          <Link to="/login" className="font-medium text-yellow-600 hover:text-yellow-500">
+          <Link
+            to="/login"
+            className="font-medium text-yellow-600 hover:text-yellow-500"
+          >
             Masuk
           </Link>
         </p>
