@@ -11,6 +11,8 @@ const Checkout = () => {
   const [success, setSuccess] = useState(null);
   const navigate = useNavigate();
   const [imageFile, setImageFile] = useState(null);
+  const [orderId, setOrderId] = useState(null);
+
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
@@ -32,7 +34,20 @@ const Checkout = () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Validasi tipe file
+    if (!file.type.match("image.*")) {
+      setError("Hanya file gambar yang diperbolehkan");
+      return;
+    }
+
+    // Validasi ukuran file (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Ukuran file maksimal 2MB");
+      return;
+    }
+
     setImageFile(file);
+    setError(null);
 
     // Membuat preview gambar
     const reader = new FileReader();
@@ -60,14 +75,10 @@ const Checkout = () => {
     try {
       setIsSubmitting(true);
       const response = await OrderService.checkout();
-      setSuccess(
-        "Pesanan berhasil dibuat! Silakan kirim bukti pembayaran via WhatsApp."
-      );
-
-      // Redirect ke halaman pesanan saya setelah 3 detik
-      setTimeout(() => {
-        navigate("/my-orders");
-      }, 3000);
+      console.log("Checkout response:", response);
+      setOrderId(response.data.order.id);
+      console.log("Order ID set:", response.data.order.id); // Simpan order ID
+      setSuccess("Pesanan berhasil dibuat! Silakan upload bukti pembayaran.");
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);
@@ -79,13 +90,57 @@ const Checkout = () => {
       setIsSubmitting(false);
     }
   };
-
   const calculateTotal = () => {
     return cart.items.reduce((total, item) => {
       return total + item.Menu.price * item.quantity;
     }, 0);
   };
 
+  const handlePaymentSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      setError(null);
+
+      if (!imageFile) {
+        setError("Harap pilih file bukti pembayaran");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("payment_proof", imageFile);
+
+      console.log("Mengupload bukti pembayaran untuk order:", orderId);
+
+      const uploadResponse = await OrderService.uploadPaymentProof(
+        orderId,
+        formData
+      );
+
+      console.log("Upload berhasil:", uploadResponse);
+
+      setSuccess(
+        "Bukti pembayaran berhasil diupload! Pesanan Anda akan segera diproses."
+      );
+
+      setTimeout(() => {
+        navigate("/my-orders");
+      }, 3000);
+    } catch (err) {
+      console.error("Detail error:", {
+        message: err.message,
+        response: err.response?.data,
+        stack: err.stack,
+      });
+
+      const errorMessage =
+        err.response?.data?.message ||
+        "Gagal mengupload bukti pembayaran. Silakan coba lagi atau hubungi admin.";
+
+      setError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -171,8 +226,6 @@ const Checkout = () => {
             />
           </div>
 
-         
-
           {/* Image Preview */}
           {imagePreview && (
             <div className="mt-2">
@@ -200,21 +253,38 @@ const Checkout = () => {
           </p>
         </div>
 
-        <button
-          onClick={handleCheckout}
-          disabled={isSubmitting || success}
-          className={`w-full py-3 rounded ${
-            isSubmitting || success
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-yellow-500 hover:bg-yellow-600 text-white"
-          }`}
-        >
-          {isSubmitting
-            ? "Memproses..."
-            : success
-            ? "Pesanan Berhasil Dibuat"
-            : "Konfirmasi Pesanan"}
-        </button>
+        {!orderId ? (
+          <button
+            onClick={handleCheckout}
+            disabled={isSubmitting}
+            className={`w-full py-3 rounded ${
+              isSubmitting
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-yellow-500 hover:bg-yellow-600 text-white"
+            }`}
+          >
+            {isSubmitting ? "Memproses..." : "Konfirmasi Pesanan"}
+          </button>
+        ) : (
+          <div className="space-y-4">
+            <div className="p-4 bg-blue-50 rounded">
+              <p className="text-blue-700">
+                Silakan upload bukti pembayaran untuk pesanan #{orderId}
+              </p>
+            </div>
+            <button
+              onClick={handlePaymentSubmit}
+              disabled={isSubmitting}
+              className={`w-full py-3 rounded ${
+                isSubmitting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-600 text-white"
+              }`}
+            >
+              {isSubmitting ? "Mengupload..." : "Kirim Bukti Pembayaran"}
+            </button>
+          </div>
+        )}
 
         {!success && (
           <button
