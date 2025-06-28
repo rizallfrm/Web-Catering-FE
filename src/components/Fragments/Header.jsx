@@ -4,6 +4,7 @@ import NavLink from "../Elements/NavLink";
 import AuthService from "../services/authService";
 import { useCart } from "../../context/CartContext";
 import CartModal from "../Elements/cartModal";
+import toast from "react-hot-toast";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -101,14 +102,16 @@ const Header = () => {
 
       // Then logout the user
       AuthService.logout();
-
+      toast.success("Logout berhasil");
       // Update local state
       setIsLoggedIn(false);
       setUser(null);
       setShowUserMenu(false);
 
       // Redirect to login page
-      navigate("/login");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -143,7 +146,7 @@ const Header = () => {
           <img
             src="/logo.png"
             alt="Mamake Logo"
-            className="h-20 sm:h-28 md:h-36 lg:h-44 w-auto object-contain -m-2 sm:-m-2 md:-m-2 lg:-m-4 xl:-m-10
+            className="h-20  sm:h-28 md:h-36 lg:h-44 w-auto object-contain -m-2 sm:-m-2 md:-m-2 lg:-m-4 xl:-m-10
  transition-transform duration-300 hover:scale-105 "
           />
           <Link
@@ -209,7 +212,7 @@ const Header = () => {
 
           {/* Login Button or User Icon */}
           {!isLoggedIn ? (
-         <Link
+            <Link
               to="/login"
               className="relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-medium text-yellow-600 transition duration-300 ease-out rounded-full shadow-lg group"
             >
