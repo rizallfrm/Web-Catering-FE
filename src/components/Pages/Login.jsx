@@ -1,55 +1,61 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import AuthService from '../services/authService';
-import AuthLayout from './AuthLayout';
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import AuthService from "../services/authService";
+import AuthLayout from "./AuthLayout";
+import toast from "react-hot-toast";
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-  const [error, setError] = useState('');
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Check if user is already logged in
   useEffect(() => {
     if (AuthService.isAuthenticated()) {
-      navigate('/');
+      navigate("/");
     }
   }, [navigate]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+ const onSubmit = async (data) => {
+  setError('');
+  setIsLoading(true);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
+  // ⏳ Tampilkan loading toast dengan progress
+  const toastId = toast.loading('Sedang memproses...');
 
-    try {
-      await AuthService.login(formData);
+  try {
+    await AuthService.login(data);
 
-      // Check user role to determine redirect
-      const user = AuthService.getCurrentUser();
+    // ✅ Ganti toast jadi sukses
+    toast.success('Login berhasil!', { id: toastId });
+
+    const user = AuthService.getCurrentUser();
+
+    // ⏱️ Tunggu sedikit agar user lihat toast, baru redirect
+    setTimeout(() => {
       if (user?.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/');
       }
-    } catch (err) {
-      console.error('Login error:', err);
-      setError('Email atau password salah. Silakan coba lagi.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    }, 1000); // 1 detik
 
+  } catch (err) {
+    console.error('Login error:', err);
+    setError('Email atau password salah. Silakan coba lagi.');
+
+    // ❌ Ganti toast jadi error
+    toast.error('Login gagal. Silakan coba lagi.', { id: toastId });
+
+  } finally {
+    setIsLoading(false);
+  }
+};
   return (
     <AuthLayout title="Masuk ke Akun Anda">
       {error && (
@@ -58,35 +64,47 @@ const Login = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700"
+          >
             Email
           </label>
           <input
             type="email"
             id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 sm:text-sm p-2 border"
+            {...register("email", { required: "Email wajib diisi." })}
+            className={`mt-1 block w-full rounded-md border ${
+              errors.email ? "border-red-500" : "border-gray-300"
+            } shadow-sm focus:border-yellow-500 focus:ring-yellow-500 sm:text-sm p-2`}
           />
+          {errors.email && (
+            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+          )}
         </div>
 
         <div className="mb-6">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-gray-700"
+          >
             Password
           </label>
           <input
             type="password"
             id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 sm:text-sm p-2 border"
+            {...register("password", { required: "Password wajib diisi." })}
+            className={`mt-1 block w-full rounded-md border ${
+              errors.password ? "border-red-500" : "border-gray-300"
+            } shadow-sm focus:border-yellow-500 focus:ring-yellow-500 sm:text-sm p-2`}
           />
+          {errors.password && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.password.message}
+            </p>
+          )}
         </div>
 
         <div>
@@ -94,18 +112,21 @@ const Login = () => {
             type="submit"
             disabled={isLoading}
             className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-              isLoading ? 'bg-yellow-400' : 'bg-yellow-600 hover:bg-yellow-700'
+              isLoading ? "bg-yellow-400" : "bg-yellow-600 hover:bg-yellow-700"
             } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500`}
           >
-            {isLoading ? 'Memproses...' : 'Masuk'}
+            {isLoading ? "Memproses..." : "Masuk"}
           </button>
         </div>
       </form>
 
       <div className="mt-6">
         <p className="text-center text-sm text-gray-600">
-          Belum punya akun?{' '}
-          <Link to="/register" className="font-medium text-yellow-600 hover:text-yellow-500">
+          Belum punya akun?{" "}
+          <Link
+            to="/register"
+            className="font-medium text-yellow-600 hover:text-yellow-500"
+          >
             Daftar Sekarang
           </Link>
         </p>
