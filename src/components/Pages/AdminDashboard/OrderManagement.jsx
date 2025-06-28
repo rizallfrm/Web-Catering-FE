@@ -389,24 +389,58 @@ const OrderManagement = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {selectedOrder.OrderItems &&
+                    {selectedOrder.OrderItems &&
+                  selectedOrder.OrderItems.length > 0 ? (
                     selectedOrder.OrderItems.map((item) => (
                       <tr key={item.id}>
                         <td className="px-4 py-2">
-                          {item.Menu?.name || `Menu #${item.menu_id}`}
+                          <div className="flex items-center">
+                            {item.Menu?.image_url && (
+                              <img
+                                src={item.Menu.image_url}
+                                alt={item.Menu.name}
+                                className="w-12 h-12 object-cover rounded mr-3"
+                              />
+                            )}
+                            <div>
+                              <div className="font-medium">
+                                {item.Menu?.name || `Menu ID: ${item.menu_id}`}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                Rp{" "}
+                                {item.Menu?.price?.toLocaleString("id-ID") ||
+                                  "0"}
+                              </div>
+                            </div>
+                          </div>
                         </td>
                         <td className="px-4 py-2 text-right">
-                          Rp {item.price ? item.price.toLocaleString() : "0"}
+                          Rp{" "}
+                          {item.price
+                            ? item.price.toLocaleString("id-ID")
+                            : "0"}
                         </td>
                         <td className="px-4 py-2 text-right">
                           {item.quantity}
                         </td>
                         <td className="px-4 py-2 text-right font-medium">
                           Rp{" "}
-                          {((item.price || 0) * item.quantity).toLocaleString()}
+                          {((item.price || 0) * item.quantity).toLocaleString(
+                            "id-ID"
+                          )}
                         </td>
                       </tr>
-                    ))}
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="4"
+                        className="px-4 py-2 text-center text-gray-500"
+                      >
+                        Tidak ada item pesanan
+                      </td>
+                    </tr>
+                  )}
                   <tr className="bg-gray-50">
                     <td
                       colSpan="3"
@@ -422,6 +456,68 @@ const OrderManagement = () => {
                     </td>
                   </tr>
                 </tbody>
+
+                {/*Bukti Pembayaran */}
+                <h3 className="text-lg font-medium mb-3">Bukti Pembayaran</h3>
+                {selectedOrder.proof_image_url ? (
+                  <div className="mb-6">
+                    <button
+                      onClick={() => {
+                        const dialog = document.getElementById("imageDialog");
+                        dialog.querySelector("img").src =
+                          selectedOrder.proof_image_url;
+                        dialog.showModal();
+                      }}
+                      className="w-full"
+                    >
+                      <img
+                        src={selectedOrder.proof_image_url}
+                        alt="Bukti Pembayaran"
+                        className="w-full max-w-md h-auto object-contain border rounded hover:opacity-90 transition-opacity"
+                      />
+                    </button>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Upload pada: {formatDate(selectedOrder.updatedAt)}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 p-4 rounded mb-6">
+                    <p className="text-gray-500">Belum ada bukti pembayaran</p>
+                  </div>
+                )}
+                <dialog
+                  id="imageDialog"
+                  className="backdrop:bg-black/80 rounded-lg"
+                >
+                  <div className="relative">
+                    <img
+                      src=""
+                      alt="Bukti Pembayaran (Perbesar)"
+                      className="max-h-[90vh]"
+                    />
+                    <button
+                      onClick={() =>
+                        document.getElementById("imageDialog").close()
+                      }
+                      className="absolute top-2 right-2 bg-white/80 rounded-full p-1 hover:bg-white"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </dialog>
               </table>
             </div>
 
@@ -465,18 +561,19 @@ const OrderManagement = () => {
                 Selesai
               </button>
               <button
-                onClick={() =>
-                  handleUpdateStatus(selectedOrder.id, "cancelled")
-                }
-                className={`px-3 py-2 rounded ${
-                  selectedOrder.status === "cancelled"
-                    ? "bg-red-500 text-white"
-                    : "bg-red-100 text-red-800 hover:bg-red-200"
-                }`}
-                disabled={selectedOrder.status === "cancelled"}
-              >
-                Dibatalkan
-              </button>
+  onClick={() => handleUpdateStatus(selectedOrder.id, "cancelled")}
+  className={`
+    px-3 py-2 rounded
+    ${selectedOrder.status === "cancelled"
+      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+      : "bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+    }
+    transition-colors duration-200
+  `}
+  disabled={selectedOrder.status === "cancelled"}
+>
+  Dibatalkan
+</button>
             </div>
 
             <div className="flex justify-end">
