@@ -4,7 +4,7 @@ import Hero from "../Fragments/Hero";
 import MenuSection from "../Fragments/MenuSection";
 import OrderProcess from "../Fragments/OrderProcess";
 import TestimonialSection from "../Fragments/TestimonialSection";
-const nomorWhatsApp = "6289527308651";
+const nomorWhatsApp = "6285137411338";
 
 const bukaWhatsApp = () => {
   window.open(`https://wa.me/${nomorWhatsApp}`, "_blank");
