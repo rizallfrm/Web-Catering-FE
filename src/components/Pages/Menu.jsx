@@ -58,24 +58,35 @@ const Menu = () => {
 
   // Mendapatkan kategori unik dari menu
   const categories = [
-    { 
-      value: "all", 
-      label: "Semua", 
+    {
+      value: "all",
+      label: "Semua",
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 6h16M4 12h16M4 18h16"
+          />
         </svg>
-      )
+      ),
     },
     ...Array.from(
       new Set(
         menus.filter((menu) => menu.category).map((menu) => menu.category)
       )
-    ).map(category => ({
+    ).map((category) => ({
       value: category,
       label: category,
-      icon: getCategoryIcon(category)
-    }))
+      icon: getCategoryIcon(category),
+    })),
   ];
 
   // Filter menu berdasarkan kategori dan pencarian
@@ -98,10 +109,12 @@ const Menu = () => {
     try {
       // Check if user is logged in
       if (!isLoggedIn) {
-       toast.error('Silakan login terlebih dahulu untuk menambahkan ke keranjang.');
+        toast.error(
+          "Silakan login terlebih dahulu untuk menambahkan ke keranjang."
+        );
         setTimeout(() => {
           setNotification(null);
-          navigate("/login"); 
+          navigate("/login");
         }, 1000);
         return;
       }
@@ -159,13 +172,10 @@ const Menu = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-12 text-center">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4 
-          bg-gradient-to-r from-yellow-500 to-yellow-600 
-          text-transparent bg-clip-text">
-          Menu Kami
-        </h1>
+    <div className="container mx-auto px-4 py-16 max-w-7xl">
+      <div className="mb-16 text-center">
+        <h1 className="text-4xl font-bold text-gray-800 mb-4">Menu Kami</h1>
+        <div className="w-20 h-1 bg-amber-500 mx-auto mb-6"></div>
         <p className="text-gray-500 max-w-2xl mx-auto">
           Pilih hidangan favorit Anda dari berbagai pilihan menu spesial kami
         </p>
@@ -177,7 +187,7 @@ const Menu = () => {
           {/* Search Input */}
           <div className="relative w-full md:w-2/3">
             <input
-              type="text" 
+              type="text"
               placeholder="Cari menu favoritmu..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -185,18 +195,21 @@ const Menu = () => {
                 rounded-full focus:outline-none focus:ring-2 
                 focus:ring-yellow-400 transition-all duration-300"
             />
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-6 w-6 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" 
-              fill="none" 
-              viewBox="0 0 24 24" 
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </div>
-
-    
         </div>
       </div>
 
@@ -213,14 +226,19 @@ const Menu = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredMenus.length === 0 ? (
             <div className="col-span-full text-center py-12">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-24 w-24 mx-auto text-gray-300 mb-4" 
-                fill="none" 
-                viewBox="0 0 24 24" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-24 w-24 mx-auto text-gray-300 mb-4"
+                fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 005.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1}
+                  d="M9.172 16.172a4 4 0 005.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <p className="text-gray-500 text-xl">Ups! Menu tidak ditemukan</p>
             </div>
@@ -246,20 +264,24 @@ const Menu = () => {
                       <span className="text-gray-400">No Image</span>
                     </div>
                   )}
-                  
+
                   {menu.category && (
-                    <span className="absolute top-4 right-4 
+                    <span
+                      className="absolute top-4 right-4 
                       bg-yellow-500/80 text-white px-3 py-1 
-                      rounded-full text-xs">
+                      rounded-full text-xs"
+                    >
                       {menu.category}
                     </span>
                   )}
                 </div>
 
                 <div className="p-6">
-                  <h3 className="text-2xl font-bold mb-2 
+                  <h3
+                    className="text-2xl font-bold mb-2 
                     text-gray-800 group-hover:text-yellow-600 
-                    transition-colors">
+                    transition-colors"
+                  >
                     {menu.name}
                   </h3>
 
@@ -273,7 +295,7 @@ const Menu = () => {
                     <span className="text-2xl font-bold text-yellow-600">
                       Rp {menu.price.toLocaleString()}
                     </span>
-                    
+
                     <button
                       onClick={() => handleAddToCart(menu)}
                       disabled={addingToCart && addedItemId === menu.id}
@@ -288,21 +310,27 @@ const Menu = () => {
                       `}
                     >
                       <span>
-                        {addingToCart && addedItemId === menu.id 
-                          ? "Loading..." 
+                        {addingToCart && addedItemId === menu.id
+                          ? "Loading..."
                           : "+ Keranjang"}
                       </span>
-                      <svg 
+                      <svg
                         className={`w-5 h-5 transition-opacity duration-300 
-                          ${addingToCart && addedItemId === menu.id 
-                            ? 'opacity-0' 
-                            : 'group-hover:opacity-100 opacity-0'}`} 
-                        fill="none" 
-                        stroke="currentColor" 
+                          ${
+                            addingToCart && addedItemId === menu.id
+                              ? "opacity-0"
+                              : "group-hover:opacity-100 opacity-0"
+                          }`}
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -322,17 +350,30 @@ const Menu = () => {
             transition-all duration-300 transform hover:scale-110
             flex items-center justify-center"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+            />
           </svg>
         </button>
       </div>
 
       {/* Notifikasi */}
       {notification && (
-        <div className="fixed bottom-4 right-4 bg-green-500 text-white 
+        <div
+          className="fixed bottom-4 right-4 bg-green-500 text-white 
           px-6 py-3 rounded-lg shadow-lg z-50 
-          animate-bounce">
+          animate-bounce"
+        >
           {notification}
         </div>
       )}
