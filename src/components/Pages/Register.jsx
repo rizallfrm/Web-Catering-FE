@@ -30,6 +30,7 @@ const Register = () => {
         lastName: data.lastName || "",
         email: data.email,
         phone: data.phone,
+        address: data.address || "",
         password: data.password,
       };
 
@@ -141,6 +142,31 @@ const Register = () => {
           />
           {errors.email && (
             <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+          )}
+        </div>
+
+        <div>
+          <label
+            htmlFor="address"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Alamat
+          </label>
+          <input
+            id="address"
+            type="tel"
+            autoComplete="tel"
+            className={`mt-1 block w-full rounded-md shadow-sm focus:border-yellow-500 focus:ring-yellow-500 sm:text-sm p-2 border ${
+              errors.address ? "border-red-300" : "border-gray-300"
+            }`}
+            {...register("address", {
+              required: "Alamat wajib diisi",
+            })}
+          />
+          {errors.address && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.address.message}
+            </p>
           )}
         </div>
 

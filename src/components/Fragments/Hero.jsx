@@ -63,10 +63,10 @@ const Hero = () => {
             isLoaded ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
           }`}
         >
-          <h5 className="font-light text-lg mb-3 tracking-widest uppercase">Sentuhan Kuliner Premium</h5>
+          <h5 className="font-light text-lg mb-3 tracking-widest uppercase">Pesanan Catering Premium</h5>
           <div className="w-16 h-0.5 bg-white/70 mx-auto mb-6"></div>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            Catering Lezat<br className="hidden sm:block" /> untuk Setiap Acara
+           Cita Rasa Khas Mamake, <br className="hidden sm:block" /> Gurihnya Bikin Nagih 
           </h1>
           <p className="text-lg sm:text-xl mb-10 font-light max-w-2xl mx-auto text-gray-100">
             Hidangan berkualitas prima dengan rasa autentik dan presentasi 
