@@ -10,7 +10,21 @@ const MyOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const navigate = useNavigate();
+  // WhatsApp message template
+  const whatsappTemplate = (order) => {
+    const orderId = order.id;
+    const totalPrice = order.total_price
+      ? order.total_price.toLocaleString("id-ID")
+      : "0";
+    const items = order.OrderItems?.map(
+      (item) =>
+        `- ${item.Menu?.name || `Menu ID: ${item.menu_id}`} (${
+          item.quantity
+        } x Rp ${item.price?.toLocaleString("id-ID") || "0"})`
+    ).join("%0A");
 
+    return `Halo admin, saya sudah melakukan pembayaran untuk pesanan berikut:%0A%0A*No. Pesanan:* ${orderId}%0A*Total:* Rp ${totalPrice}%0A%0A*Detail Pesanan:*%0A${items}%0A%0ABukti pembayaran sudah saya upload. Mohon untuk segera dicek ya. Terima kasih.`;
+  };
   useEffect(() => {
     fetchMyOrders();
   }, []);
@@ -215,6 +229,18 @@ const MyOrders = () => {
                 >
                   Lihat Detail
                 </button>
+                {order.status === "pending" && order.proof_image_url && (
+                  <a
+                    href={`https://wa.me/6285137411338?text=${whatsappTemplate(
+                      order
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition-colors duration-300"
+                  >
+                    Konfirmasi via WA
+                  </a>
+                )}
 
                 {order.status === "pending" && (
                   <button
