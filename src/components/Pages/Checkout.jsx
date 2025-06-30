@@ -248,7 +248,7 @@ const Checkout = () => {
             <p>Atas Nama: Catering ABC</p>
           </div>
           <p className="mt-2 text-sm text-gray-600">
-            Setelah melakukan pembayaran, kirimkan bukti transfer melalui
+            Setelah upload bukti pembayaran, konfirmasi pesanan Anda melalui
             WhatsApp ke nomor 0812-3456-7890.
           </p>
         </div>
