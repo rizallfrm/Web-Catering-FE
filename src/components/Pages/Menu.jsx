@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import MenuService from "../services/menuService";
 import { useCart } from "../../context/CartContext";
 import AuthService from "../services/authService";
-import toast from "react-hot-toast";
+import MenuService from "../services/menuService";
 
 const Menu = () => {
   const [menus, setMenus] = useState([]);
@@ -11,15 +11,38 @@ const Menu = () => {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const { addItem, openCart } = useCart(); // Changed from addToCart to addItem
-  const navigate = useNavigate();
-
+  const { addItem, openCart } = useCart();
   const [addingToCart, setAddingToCart] = useState(false);
   const [addedItemId, setAddedItemId] = useState(null);
-  // State untuk menampilkan notifikasi
   const [notification, setNotification] = useState(null);
-  // Check if user is logged in
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const pageRef = useRef(null);
+  const [clickedItem, setClickedItem] = useState(null);
+
+  const navigate = useNavigate();
+
+  // Animation when page enters viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (pageRef.current) {
+      observer.observe(pageRef.current);
+    }
+
+    return () => {
+      if (pageRef.current) {
+        observer.unobserve(pageRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     // Check login status
@@ -172,17 +195,24 @@ const Menu = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 max-w-7xl">
-      <div className="mb-16 text-center">
+    <div ref={pageRef} className="container mx-auto px-4 py-16 max-w-7xl">
+      <div
+        className={`mb-16 text-center transition-all duration-1000 ${
+          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+        }`}
+      >
         <h1 className="text-4xl font-bold text-gray-800 mb-4">Menu Kami</h1>
         <div className="w-20 h-1 bg-amber-500 mx-auto mb-6"></div>
         <p className="text-gray-500 max-w-2xl mx-auto">
           Pilih hidangan favorit Anda dari berbagai pilihan menu spesial kami
         </p>
       </div>
-
       {/* Search dan Kategori */}
-      <div className="mb-12">
+      <div
+        className={`mb-12 transition-all duration-1000 delay-150 ${
+          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+        }`}
+      >
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
           {/* Search Input */}
           <div className="relative w-full md:w-2/3">
@@ -212,7 +242,6 @@ const Menu = () => {
           </div>
         </div>
       </div>
-
       {/* Loading & Error Handling */}
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
@@ -224,128 +253,122 @@ const Menu = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredMenus.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-24 w-24 mx-auto text-gray-300 mb-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1}
-                  d="M9.172 16.172a4 4 0 005.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <p className="text-gray-500 text-xl">Ups! Menu tidak ditemukan</p>
-            </div>
-          ) : (
-            filteredMenus.map((menu) => (
-              <div
-                key={menu.id}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden 
-                  transform transition-all duration-300 
-                  hover:scale-105 hover:shadow-2xl group"
-              >
-                <div className="relative">
-                  {menu.image_url ? (
-                    <img
-                      src={menu.image_url}
-                      alt={menu.name}
-                      className="w-full h-56 object-cover 
-                        transition-transform duration-300 
-                        group-hover:scale-110"
-                    />
-                  ) : (
-                    <div className="w-full h-56 bg-gray-100 flex items-center justify-center">
-                      <span className="text-gray-400">No Image</span>
-                    </div>
-                  )}
+          {filteredMenus.map((menu, index) => (
+            <div
+              key={menu.id}
+              className={`bg-white rounded-2xl shadow-lg overflow-hidden 
+                transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group
+                transition-all duration-1000 ${
+                  isVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-10"
+                }
+                ${
+                  clickedItem === menu.id
+                    ? "animate-pulse ring-2 ring-amber-500"
+                    : ""
+                }`}
+              style={{ transitionDelay: `${(index % 6) * 100}ms` }}
+              onClick={() => handleItemClick(menu.id)}
+            >
+              <div className="relative">
+                {menu.image_url ? (
+                  <img
+                    src={menu.image_url}
+                    alt={menu.name}
+                    className="w-full h-56 object-cover 
+                      transition-transform duration-300 
+                      group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="w-full h-56 bg-gray-100 flex items-center justify-center">
+                    <span className="text-gray-400">No Image</span>
+                  </div>
+                )}
 
-                  {menu.category && (
-                    <span
-                      className="absolute top-4 right-4 
-                      bg-yellow-500/80 text-white px-3 py-1 
-                      rounded-full text-xs"
-                    >
-                      {menu.category}
-                    </span>
-                  )}
-                </div>
-
-                <div className="p-6">
-                  <h3
-                    className="text-2xl font-bold mb-2 
-                    text-gray-800 group-hover:text-yellow-600 
-                    transition-colors"
+                {menu.category && (
+                  <span
+                    className="absolute top-4 right-4 
+                    bg-yellow-500/80 text-white px-3 py-1 
+                    rounded-full text-xs"
                   >
-                    {menu.name}
-                  </h3>
+                    {menu.category}
+                  </span>
+                )}
+              </div>
 
-                  {menu.description && (
-                    <p className="text-gray-500 mb-4 line-clamp-2">
-                      {menu.description}
-                    </p>
-                  )}
+              <div className="p-6">
+                <h3
+                  className="text-2xl font-bold mb-2 
+                  text-gray-800 group-hover:text-yellow-600 
+                  transition-colors"
+                >
+                  {menu.name}
+                </h3>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-yellow-600">
-                      Rp {menu.price.toLocaleString()}
+                {menu.description && (
+                  <p className="text-gray-500 mb-4 line-clamp-2">
+                    {menu.description}
+                  </p>
+                )}
+
+                <div className="flex justify-between items-center">
+                  <span className="text-2xl font-bold text-yellow-600">
+                    Rp {menu.price.toLocaleString()}
+                  </span>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(menu);
+                    }}
+                    disabled={addingToCart && addedItemId === menu.id}
+                    className={`
+                      px-5 py-2 rounded-full transition-all duration-300
+                      flex items-center space-x-2 group
+                      ${
+                        addingToCart && addedItemId === menu.id
+                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          : "bg-yellow-500 text-white hover:bg-yellow-600 hover:shadow-lg"
+                      }
+                    `}
+                  >
+                    <span>
+                      {addingToCart && addedItemId === menu.id
+                        ? "Loading..."
+                        : "+ Keranjang"}
                     </span>
-
-                    <button
-                      onClick={() => handleAddToCart(menu)}
-                      disabled={addingToCart && addedItemId === menu.id}
-                      className={`
-                        px-5 py-2 rounded-full transition-all duration-300
-                        flex items-center space-x-2 group
+                    <svg
+                      className={`w-5 h-5 transition-opacity duration-300 
                         ${
                           addingToCart && addedItemId === menu.id
-                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                            : "bg-yellow-500 text-white hover:bg-yellow-600 hover:shadow-lg"
-                        }
-                      `}
+                            ? "opacity-0"
+                            : "group-hover:opacity-100 opacity-0"
+                        }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      <span>
-                        {addingToCart && addedItemId === menu.id
-                          ? "Loading..."
-                          : "+ Keranjang"}
-                      </span>
-                      <svg
-                        className={`w-5 h-5 transition-opacity duration-300 
-                          ${
-                            addingToCart && addedItemId === menu.id
-                              ? "opacity-0"
-                              : "group-hover:opacity-100 opacity-0"
-                          }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17"
-                        />
-                      </svg>
-                    </button>
-                  </div>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17"
+                      />
+                    </svg>
+                  </button>
                 </div>
               </div>
-            ))
-          )}
+            </div>
+          ))}
         </div>
       )}
-
       {/* Floating Pesanan Saya Button */}
       <div className="fixed bottom-6 right-6 z-50">
         <button
+          target="_blank"
           onClick={goToMyOrders}
-          className="bg-yellow-500 text-white p-4 rounded-full 
+          className="bg-yellow-600 text-white p-4 rounded-full 
             shadow-2xl hover:bg-yellow-600 hover:shadow-lg
             transition-all duration-300 transform hover:scale-110
             flex items-center justify-center"
@@ -363,10 +386,10 @@ const Menu = () => {
               strokeWidth={2}
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
             />
-          </svg>
+          </svg>{" "}
+          <span className="px-2">Pesanan Saya </span>
         </button>
       </div>
-
       {/* Notifikasi */}
       {notification && (
         <div
@@ -377,6 +400,19 @@ const Menu = () => {
           {notification}
         </div>
       )}
+      <style jsx>{`
+        @keyframes progress {
+          0% {
+            width: 0%;
+          }
+          100% {
+            width: 100%;
+          }
+        }
+        .animate-progress {
+          animation: progress 5s linear;
+        }
+      `}</style>
     </div>
   );
 };
