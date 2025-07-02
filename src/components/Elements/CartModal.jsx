@@ -7,7 +7,16 @@ const CartModal = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isUpdating, setIsUpdating] = useState({});
+  const [localQuantities, setLocalQuantities] = useState({});
+
   const navigate = useNavigate();
+  useEffect(() => {
+    const updatedQuantities = {};
+    cart.items.forEach((item) => {
+      updatedQuantities[item.id] = item.quantity;
+    });
+    setLocalQuantities(updatedQuantities);
+  }, [cart.items]);
 
   useEffect(() => {
     if (isOpen) {
@@ -21,7 +30,7 @@ const CartModal = ({ isOpen, onClose }) => {
       const cartData = await CartService.getCart();
       setCart({
         ...cartData,
-        items: cartData.items || [], 
+        items: cartData.items || [],
       });
       setError(null);
     } catch (err) {
@@ -35,14 +44,14 @@ const CartModal = ({ isOpen, onClose }) => {
 
   const handleRemoveItem = async (itemId) => {
     try {
-      setIsUpdating(prev => ({ ...prev, [itemId]: true }));
+      setIsUpdating((prev) => ({ ...prev, [itemId]: true }));
       await CartService.removeItem(itemId);
       await fetchCart();
     } catch (err) {
       setError("Gagal menghapus item");
       console.error("Error removing item:", err);
     } finally {
-      setIsUpdating(prev => ({ ...prev, [itemId]: false }));
+      setIsUpdating((prev) => ({ ...prev, [itemId]: false }));
     }
   };
 
@@ -51,14 +60,14 @@ const CartModal = ({ isOpen, onClose }) => {
     if (quantity < 1) return;
 
     try {
-      setIsUpdating(prev => ({ ...prev, [itemId]: true }));
+      setIsUpdating((prev) => ({ ...prev, [itemId]: true }));
       await CartService.updateItemQuantity(itemId, quantity);
       await fetchCart();
     } catch (err) {
       setError("Gagal update jumlah item");
       console.error("Error updating quantity:", err);
     } finally {
-      setIsUpdating(prev => ({ ...prev, [itemId]: false }));
+      setIsUpdating((prev) => ({ ...prev, [itemId]: false }));
     }
   };
 
@@ -74,7 +83,7 @@ const CartModal = ({ isOpen, onClose }) => {
   };
 
   const itemsCount = cart?.items?.length || 0;
-  
+
   if (!isOpen) return null;
 
   return (
@@ -127,33 +136,87 @@ const CartModal = ({ isOpen, onClose }) => {
                   className="flex justify-between items-center border-b pb-4"
                 >
                   <div>
-                    <h3 className="font-medium">{item.Menu?.name || 'Menu Item'}</h3>
+                    <h3 className="font-medium">
+                      {item.Menu?.name || "Menu Item"}
+                    </h3>
                     <p className="text-gray-600">
                       Rp {(item.Menu?.price || 0).toLocaleString()}
                     </p>
                   </div>
                   <div className="flex items-center">
                     <button
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                      onClick={() =>
+                        handleUpdateQuantity(item.id, item.quantity - 1)
+                      }
                       disabled={isUpdating[item.id]}
-                      className={`px-2 py-1 bg-gray-200 rounded-l ${isUpdating[item.id] ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`px-2 py-1 bg-gray-200 rounded-l ${
+                        isUpdating[item.id]
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
                     >
                       -
                     </button>
-                    <span className="px-4 py-1 bg-gray-100">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+
+                    <input
+                      type="number"
+                      min={1}
+                      value={
+                        localQuantities[item.id] === 0 ||
+                        localQuantities[item.id] === undefined
+                          ? ""
+                          : localQuantities[item.id]
+                      }
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setLocalQuantities((prev) => ({
+                          ...prev,
+                          [item.id]: val === "" ? 0 : parseInt(val, 10),
+                        }));
+                      }}
+                      onBlur={() => {
+                        const qty = localQuantities[item.id];
+                        if (qty >= 1) {
+                          handleUpdateQuantity(item.id, qty);
+                        } else {
+                          // Reset jika invalid
+                          setLocalQuantities((prev) => ({
+                            ...prev,
+                            [item.id]: item.quantity,
+                          }));
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.target.blur(); // Trigger blur untuk update
+                        }
+                      }}
                       disabled={isUpdating[item.id]}
-                      className={`px-2 py-1 bg-gray-200 rounded-r ${isUpdating[item.id] ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className="w-16 text-center px-2 py-1 bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+
+                    <button
+                      onClick={() =>
+                        handleUpdateQuantity(item.id, item.quantity + 1)
+                      }
+                      disabled={isUpdating[item.id]}
+                      className={`px-2 py-1 bg-gray-200 rounded-r ${
+                        isUpdating[item.id]
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
                     >
                       +
                     </button>
+
                     <button
                       onClick={() => handleRemoveItem(item.id)}
                       disabled={isUpdating[item.id]}
-                      className={`ml-2 text-red-500 hover:text-red-700 ${isUpdating[item.id] ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`ml-2 text-red-500 hover:text-red-700 ${
+                        isUpdating[item.id]
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
                     >
                       {isUpdating[item.id] ? (
                         <div className="animate-spin h-5 w-5 border-2 border-red-500 rounded-full border-t-transparent"></div>
@@ -190,7 +253,9 @@ const CartModal = ({ isOpen, onClose }) => {
                 onClick={handleCheckout}
                 disabled={isLoading || itemsCount === 0}
                 className={`w-full py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 ${
-                  (isLoading || itemsCount === 0) ? 'opacity-50 cursor-not-allowed' : ''
+                  isLoading || itemsCount === 0
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
                 }`}
               >
                 Checkout
