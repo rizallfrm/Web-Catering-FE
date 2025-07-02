@@ -88,7 +88,7 @@ const OrderManagement = () => {
       case "pending":
         return (
           <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded">
-            Pending
+            Menunggu
           </span>
         );
       case "processing":
