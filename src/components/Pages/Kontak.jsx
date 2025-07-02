@@ -81,31 +81,19 @@ const Kontak = () => {
   // Contact info items
   const contactInfo = [
     {
-      icon: <FaPhone className="text-amber-500" />,
-      title: "Telepon",
-      content: "+62 812-3456-7890",
-      action: "tel:+6281234567890",
-      actionText: "Hubungi",
-    },
-    {
       icon: <FaWhatsapp className="text-amber-500" />,
       title: "WhatsApp",
-      content: "+62 812-3456-7890",
-      action: "https://wa.me/6281234567890",
+      content: "+62 89527308651",
+      action: "https://wa.me/6289527308651",
       actionText: "Chat",
     },
-    {
-      icon: <FaEnvelope className="text-amber-500" />,
-      title: "Email",
-      content: "info@cateringku.com",
-      action: "mailto:info@cateringku.com",
-      actionText: "Kirim Email",
-    },
+
     {
       icon: <FaMapMarkerAlt className="text-amber-500" />,
       title: "Alamat",
-      content: "Jalan Sudirman No. 123, Jakarta Pusat, 10220",
-      action: "https://maps.google.com/?q=Jalan+Sudirman+No.+123+Jakarta",
+      content:
+        "Ds. Karangjati RT 01 / RW 03, Kec. Susukan, Kab. Banjarnegara, Prov. Jawa Tengah",
+      action: "https://maps.app.goo.gl/F43ScTAwDyRYt7aM8",
       actionText: "Lihat Peta",
     },
   ];
@@ -436,10 +424,11 @@ const Kontak = () => {
                     <FaMapMarkerAlt size={24} />
                   </div>
                   <p className="text-gray-600">
-                    Peta lokasi - Jalan Sudirman No. 123, Jakarta Pusat
+                    Ds. Karangjati RT 01 / RW 03, Kec. Susukan, Kab.
+                    Banjarnegara, Prov. Jawa Tengah
                   </p>
                   <a
-                    href="https://maps.google.com/?q=Jalan+Sudirman+No.+123+Jakarta"
+                    href="https://maps.app.goo.gl/F43ScTAwDyRYt7aM8 "
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-block mt-4 px-4 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors"
