@@ -25,6 +25,12 @@ import Register from "./components/Pages/Register";
 import Checkout from "./components/Pages/Checkout";
 import MyOrders from "./components/Pages/MyOrder";
 import AdminDashboard from "./components/Pages/AdminDashboard/AdminDashboard";
+import MenuPage from "./components_user/MenuPage";
+import CartPage from "./components_user/CartPage";
+import CheckoutPage from "./components_user/CheckOut";
+import OrderConfirmationPage from "./components_user/OrderConfirmation";
+import OrdersPage from "./components_user/OrdersPage";
+import OrderDetailPage from "./components_user/OrderDetail";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -68,8 +74,7 @@ const AppLayout = () => {
     <div className="font-poppins flex flex-col min-h-screen">
       <Toaster position="top-center " />
       {/* Conditional Header Rendering */}
-      {isAuthPage ? // No header for login/register pages
-      null : isAdminPage ? (
+      {isAuthPage ? null : isAdminPage ? ( // No header for login/register pages
         // Admin header for admin pages
         <AdminHeader />
       ) : (
@@ -80,7 +85,7 @@ const AppLayout = () => {
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/menu" element={<Menu />} />
+          <Route path="/menu" element={<MenuPage />} />
           <Route path="/tentang-kami" element={<TentangKami />} />
           <Route path="/kontak" element={<Kontak />} />
           <Route path="/login" element={<Login />} />
@@ -91,10 +96,43 @@ const AppLayout = () => {
             path="/checkout"
             element={
               <ProtectedRoute>
-                <Checkout />
+                <CheckoutPage />
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/orders/:id/confirmation"
+            element={
+              <ProtectedRoute>
+                <OrderConfirmationPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute>
+                <OrdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/:id"
+            element={
+              <ProtectedRoute>
+                <OrderDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cart"
+            element={
+              <ProtectedRoute>
+                <CartPage />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/my-orders"
             element={
@@ -135,11 +173,11 @@ const AppLayout = () => {
 
 function App() {
   return (
-    <CartProvider>
-      <Router>
+    <Router>
+      <CartProvider>
         <AppLayout />
-      </Router>
-    </CartProvider>
+      </CartProvider>
+    </Router>
   );
 }
 

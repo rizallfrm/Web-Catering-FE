@@ -41,23 +41,23 @@ const AuthService = {
       // Gabungkan firstName dan lastName menjadi satu name
       const completeUserData = {
         ...userData,
-        name: `${userData.firstName} ${userData.lastName || ''}`.trim()
+        name: `${userData.firstName} ${userData.lastName || ""}`.trim(),
       };
-  
+
       const response = await API.post("/users/register", completeUserData);
-      
+
       // Setelah registrasi berhasil, simpan data user ke localStorage
       if (response.data.user) {
         const userInfo = {
           id: response.data.user.id,
           name: response.data.user.name,
           email: response.data.user.email,
-          role: response.data.user.role || "user"
+          role: response.data.user.role || "user",
         };
-        
+
         localStorage.setItem("user", JSON.stringify(userInfo));
       }
-      
+
       return response.data;
     } catch (error) {
       throw error;
@@ -99,6 +99,9 @@ const AuthService = {
 
   isAuthenticated: () => {
     return !!localStorage.getItem("token");
+  },
+  getToken: () => {
+    return localStorage.getItem("token"); // tambahkan fungsi ini
   },
 };
 

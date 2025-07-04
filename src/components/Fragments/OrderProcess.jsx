@@ -174,22 +174,6 @@ const OrderProcess = () => {
             ))}
           </div>
         </div>
-
-        {/* CTA Button */}
-        <div className="text-center mt-8 md:mt-12">
-          <button
-            className="px-8 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-full 
-                      font-medium transition-all duration-300 shadow-md hover:shadow-lg 
-                      transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 
-                      focus:ring-offset-2 flex items-center mx-auto"
-          >
-            <FaWhatsapp className="mr-2" />
-            Pesan Via WhatsApp
-          </button>
-          <p className="text-gray-500 text-sm mt-3">
-            Langsung terhubung dengan admin kami untuk konsultasi
-          </p>
-        </div>
       </div>
     </section>
   );

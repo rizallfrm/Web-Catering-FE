@@ -24,6 +24,7 @@ export const CartProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const cartData = await CartService.getCart();
+      console.log("Fetched cart data:", cartData);
       setCart(cartData);
       setError(null);
     } catch (err) {

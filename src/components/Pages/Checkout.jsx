@@ -73,23 +73,53 @@ const Checkout = () => {
 
   const handleCheckout = async () => {
     try {
-      setIsSubmitting(true);
-      const response = await OrderService.checkout();
-      console.log("Checkout response:", response);
-      setOrderId(response.data.order.id);
-      console.log("Order ID set:", response.data.order.id); // Simpan order ID
-      setSuccess("Pesanan berhasil dibuat! Silakan upload bukti pembayaran.");
-    } catch (err) {
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Gagal melakukan checkout");
+      if (!imageFile) {
+        <p className="text-red-500 text-sm mt-2">
+          Silakan upload bukti pembayaran terlebih dahulu.
+        </p>;
+        setError("Harap upload bukti pembayaran sebelum konfirmasi pesanan.");
+        return;
       }
-      console.error("Error during checkout:", err);
+
+      setIsSubmitting(true);
+      setError(null);
+
+      // 1. Checkout (buat order)
+      const response = await OrderService.checkout();
+      const newOrderId = response.data.order.id;
+      setOrderId(newOrderId);
+
+      // 2. Upload bukti pembayaran
+      const formDataUpload = new FormData();
+      formDataUpload.append("payment_proof", imageFile);
+
+      const uploadResponse = await OrderService.uploadPaymentProof(
+        newOrderId,
+        formDataUpload
+      );
+
+      // 3. Berhasil
+      setSuccess("Pesanan berhasil dibuat dan bukti pembayaran telah dikirim!");
+      setTimeout(() => {
+        navigate("/my-orders");
+      }, 3000);
+    } catch (err) {
+      console.error("Detail error:", {
+        message: err.message,
+        response: err.response?.data,
+        stack: err.stack,
+      });
+
+      const errorMessage =
+        err.response?.data?.message ||
+        "Gagal memproses pesanan. Silakan coba lagi atau hubungi admin.";
+
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
+
   const calculateTotal = () => {
     return cart.items.reduce((total, item) => {
       return total + item.Menu.price * item.quantity;
@@ -253,45 +283,24 @@ const Checkout = () => {
           </p>
         </div>
 
-        {!orderId ? (
-          <button
-            onClick={handleCheckout}
-            disabled={isSubmitting}
-            className={`w-full py-3 rounded ${
-              isSubmitting
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-yellow-500 hover:bg-yellow-600 text-white"
-            }`}
-          >
-            {isSubmitting ? "Memproses..." : "Konfirmasi Pesanan"}
-          </button>
-        ) : (
-          <div className="space-y-4">
-            <div className="p-4 bg-blue-50 rounded">
-              <p className="text-blue-700">
-                Silakan upload bukti pembayaran untuk pesanan #{orderId}
-              </p>
-            </div>
-            <button
-              onClick={handlePaymentSubmit}
-              disabled={isSubmitting}
-              className={`w-full py-3 rounded ${
-                isSubmitting
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-green-500 hover:bg-green-600 text-white"
-              }`}
-            >
-              {isSubmitting ? "Mengupload..." : "Kirim Bukti Pembayaran"}
-            </button>
-          </div>
-        )}
+        <button
+          onClick={handleCheckout}
+          className={`w-full py-3 rounded ${
+            isSubmitting
+              ? "bg-gray-400 cursor-not-allowed text-white"
+              : "bg-yellow-500 hover:bg-yellow-600 text-white"
+          }`}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Memproses..." : "Konfirmasi Pesanan"}
+        </button>
 
         {!success && (
           <button
             onClick={() => navigate("/menu")}
             className="w-full mt-3 py-3 bg-gray-200 hover:bg-gray-300 rounded"
           >
-            Kembali Berbelanja
+            Kembali Belanja
           </button>
         )}
       </div>

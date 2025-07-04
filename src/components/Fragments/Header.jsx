@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import NavLink from "../Elements/NavLink";
 import AuthService from "../services/authService";
 import { useCart } from "../../context/CartContext";
-import CartModal from "../Elements/cartModal";
+import CartModal from "../Elements/CartModal";
 import toast from "react-hot-toast";
 
 const Header = () => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import OrderService from "../services/orderService";
 
@@ -16,6 +16,7 @@ const MyOrders = () => {
     const totalPrice = order.total_price
       ? order.total_price.toLocaleString("id-ID")
       : "0";
+
     const items = order.OrderItems?.map(
       (item) =>
         `- ${item.Menu?.name || `Menu ID: ${item.menu_id}`} (${
@@ -23,8 +24,17 @@ const MyOrders = () => {
         } x Rp ${item.price?.toLocaleString("id-ID") || "0"})`
     ).join("%0A");
 
-    return `Halo admin, saya sudah melakukan pembayaran untuk pesanan berikut:%0A%0A*No. Pesanan:* ${orderId}%0A*Total:* Rp ${totalPrice}%0A%0A*Detail Pesanan:*%0A${items}%0A%0ABukti pembayaran sudah saya upload. Mohon untuk segera dicek ya. Terima kasih.`;
+    const userName = order.User?.name || "Nama tidak tersedia";
+    const userPhone = order.User?.phone || "Tidak tersedia";
+    const userAddress = order.User?.address || "Tidak tersedia";
+    const createdAt = new Date(order.createdAt).toLocaleString("id-ID", {
+      dateStyle: "long",
+      timeStyle: "short",
+    });
+
+    return `Halo admin Dapur Catering Mamake, saya atas nama *${userName}* sudah melakukan pembayaran untuk pesanan berikut:%0A%0A*No. Pesanan:* ${orderId}%0A*Tanggal Pesanan:* ${createdAt}%0A*Nama:* ${userName}%0A*Telepon:* ${userPhone}%0A*Alamat:* ${userAddress}%0A*Total:* Rp ${totalPrice}%0A%0A*Detail Pesanan:*%0A${items}%0A%0ABukti pembayaran sudah saya upload. Mohon untuk segera dicek ya. Terima kasih.`;
   };
+
   useEffect(() => {
     fetchMyOrders();
   }, []);
@@ -48,7 +58,11 @@ const MyOrders = () => {
   };
 
   const handleViewDetails = (order) => {
-    setSelectedOrder(order);
+    if (order.status === "Menunggu Konfirmasi") {
+      navigate(`/orders/${order.id}/confirmation`);
+    } else {
+      navigate(`/orders/${order.id}`);
+    }
   };
 
   const closeDetails = () => {
@@ -229,7 +243,7 @@ const MyOrders = () => {
                 >
                   Lihat Detail
                 </button>
-                {order.status === "pending" && order.proof_image_url && (
+                {order.status === "Menunggu Konfirmasi" && (
                   <a
                     href={`https://wa.me/6285137411338?text=${whatsappTemplate(
                       order
@@ -242,7 +256,7 @@ const MyOrders = () => {
                   </a>
                 )}
 
-                {order.status === "pending" && (
+                {order.status === "Menunggu Konfirmasi" && (
                   <button
                     onClick={() => handleCancelOrder(order.id)}
                     className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-300"
