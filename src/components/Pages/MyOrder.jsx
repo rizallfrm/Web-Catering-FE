@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import OrderService from "../services/orderService";
 
@@ -58,7 +58,11 @@ const MyOrders = () => {
   };
 
   const handleViewDetails = (order) => {
-    setSelectedOrder(order);
+    if (order.status === "Menunggu Konfirmasi") {
+      navigate(`/orders/${order.id}/confirmation`);
+    } else {
+      navigate(`/orders/${order.id}`);
+    }
   };
 
   const closeDetails = () => {
@@ -239,7 +243,7 @@ const MyOrders = () => {
                 >
                   Lihat Detail
                 </button>
-                {order.status === "pending" && order.proof_image_url && (
+                {order.status === "Menunggu Konfirmasi" && (
                   <a
                     href={`https://wa.me/6285137411338?text=${whatsappTemplate(
                       order
@@ -252,7 +256,7 @@ const MyOrders = () => {
                   </a>
                 )}
 
-                {order.status === "pending" && (
+                {order.status === "Menunggu Konfirmasi" && (
                   <button
                     onClick={() => handleCancelOrder(order.id)}
                     className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-300"
