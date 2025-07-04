@@ -26,7 +26,7 @@ const OrderManagement = () => {
       // Check for the proper data structure
       let ordersData = [];
       if (response.data && response.data.orders) {
-        ordersData = response.data.orders;
+        ordersData = response.data.data.orders;
       } else if (response.orders) {
         ordersData = response.orders;
       } else if (Array.isArray(response)) {
@@ -48,11 +48,11 @@ const OrderManagement = () => {
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
       setIsLoading(true);
-      await OrderService.updateStatus(orderId, newStatus);
+      const updatedOrder = await OrderService.updateStatus(orderId, newStatus);
 
       // Update order dalam state
-      setOrders(
-        orders.map((order) =>
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
           order.id === orderId ? { ...order, status: newStatus } : order
         )
       );
@@ -60,6 +60,61 @@ const OrderManagement = () => {
       // Jika order yang diupdate adalah yang sedang dipilih, update juga
       if (selectedOrder && selectedOrder.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: newStatus });
+      }
+
+      setSuccess(`Status pesanan berhasil diubah menjadi ${newStatus}`);
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError(
+        "Gagal mengubah status pesanan: " +
+          (err.response?.data?.message || err.message || "Unknown error")
+      );
+      console.error("Error updating order status:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyPayment = async (orderId) => {
+    try {
+      setIsLoading(true);
+      const updatedOrder = await OrderService.verifyPayment(orderId);
+
+      // Update orders list
+      setOrders((prevOrders) =>
+        prevOrders.map((order) => (order.id === orderId ? updatedOrder : order))
+      );
+
+      // Update selected order if open
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder(updatedOrder);
+      }
+
+      setSuccess("Pembayaran berhasil diverifikasi");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError("Gagal memverifikasi pembayaran: " + err.message);
+      console.error("Error verifying payment:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdatePaymentStatus = async (orderId, newStatus) => {
+    try {
+      setIsLoading(true);
+      await OrderService.updateStatus(orderId, newStatus);
+
+      // Update order dalam state
+      setOrders(
+        orders.map((order) =>
+          order.id === orderId ? { ...order, payment_status: newStatus } : order
+        )
+      );
+
+      // Jika order yang diupdate adalah yang sedang dipilih, update juga
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder({ ...selectedOrder, payment_status: newStatus });
       }
 
       setSuccess(`Status pesanan berhasil diubah menjadi ${newStatus}`);
@@ -220,7 +275,7 @@ const OrderManagement = () => {
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full  border-collapse">
             <thead>
               <tr className="bg-gray-50">
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -326,13 +381,37 @@ const OrderManagement = () => {
                   <div className="mb-2">
                     <span className="text-gray-600">Tanggal:</span>
                     <span className="ml-2 font-medium">
-                      {formatDate(selectedOrder.createdAt)}
+                      {formatDate(selectedOrder.delivery_date)}
                     </span>
                   </div>
                   <div className="mb-2">
-                    <span className="text-gray-600">Status:</span>
+                    <span className="text-gray-600">Status Pesanan:</span>
                     <span className="ml-2">
                       {getStatusBadge(selectedOrder.status)}
+                    </span>
+                  </div>
+                  <div className="mb-2">
+                    <span className="text-gray-600">Status Pembayaran:</span>
+                    <span className="ml-2">
+                      {getStatusBadge(selectedOrder.payment_status)}
+                    </span>
+                  </div>
+                  <div className="mb-2">
+                    <span className="text-gray-600">Alamat Pengiriman:</span>
+                    <span className="ml-2">
+                      {getStatusBadge(selectedOrder.delivery_address)}
+                    </span>
+                  </div>
+                  <div className="mb-2">
+                    <span className="text-gray-600">Nomor WhatsApp:</span>
+                    <span className="ml-2">
+                      {getStatusBadge(selectedOrder.wa_number)}
+                    </span>
+                  </div>
+                  <div className="mb-2">
+                    <span className="text-gray-600">Notes:</span>
+                    <span className="ml-2">
+                      {getStatusBadge(selectedOrder.delivery_notes)}
                     </span>
                   </div>
                   <div>
@@ -377,6 +456,9 @@ const OrderManagement = () => {
                     <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Item
                     </th>
+                    <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Kategori
+                    </th>
                     <th className="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Harga
                     </th>
@@ -389,7 +471,7 @@ const OrderManagement = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                    {selectedOrder.OrderItems &&
+                  {selectedOrder.OrderItems &&
                   selectedOrder.OrderItems.length > 0 ? (
                     selectedOrder.OrderItems.map((item) => (
                       <tr key={item.id}>
@@ -413,6 +495,9 @@ const OrderManagement = () => {
                               </div>
                             </div>
                           </div>
+                        </td>
+                        <td className="px-4 py-2 text-right">
+                          {item.Menu?.category || "N/A"}
                         </td>
                         <td className="px-4 py-2 text-right">
                           Rp{" "}
@@ -443,8 +528,8 @@ const OrderManagement = () => {
                   )}
                   <tr className="bg-gray-50">
                     <td
-                      colSpan="3"
-                      className="px-4 py-2 text-right font-semibold"
+                      colSpan="4"
+                      className="px-4 py-2  font-semibold"
                     >
                       Total
                     </td>
@@ -521,60 +606,94 @@ const OrderManagement = () => {
               </table>
             </div>
 
-            <h3 className="text-lg font-medium mb-3">Update Status</h3>
+            <h3 className="text-lg font-medium mb-3">Update Status Pesanan</h3>
             <div className="flex flex-wrap gap-2 mb-6">
               <button
-                onClick={() => handleUpdateStatus(selectedOrder.id, "pending")}
+                onClick={() =>
+                  handleUpdateStatus(selectedOrder.id, "Dikonfirmasi")
+                }
                 className={`px-3 py-2 rounded ${
-                  selectedOrder.status === "pending"
+                  selectedOrder.status === "Dikonfirmasi"
                     ? "bg-yellow-500 text-white"
                     : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
                 }`}
-                disabled={selectedOrder.status === "pending"}
+                disabled={selectedOrder.status === "Dikonfirmasi"}
               >
-                Pending
+                Konfirmasi
               </button>
+
               <button
-                onClick={() =>
-                  handleUpdateStatus(selectedOrder.id, "processing")
-                }
+                onClick={() => handleUpdateStatus(selectedOrder.id, "Diproses")}
                 className={`px-3 py-2 rounded ${
-                  selectedOrder.status === "processing"
+                  selectedOrder.status === "Diproses"
                     ? "bg-blue-500 text-white"
                     : "bg-blue-100 text-blue-800 hover:bg-blue-200"
                 }`}
-                disabled={selectedOrder.status === "processing"}
+                disabled={selectedOrder.status === "Diproses"}
               >
                 Diproses
               </button>
               <button
-                onClick={() =>
-                  handleUpdateStatus(selectedOrder.id, "completed")
-                }
+                onClick={() => handleUpdateStatus(selectedOrder.id, "Dikirim")}
                 className={`px-3 py-2 rounded ${
-                  selectedOrder.status === "completed"
-                    ? "bg-green-500 text-white"
-                    : "bg-green-100 text-green-800 hover:bg-green-200"
+                  selectedOrder.status === "Dikirim"
+                    ? "bg-blue-500 text-white"
+                    : "bg-blue-100 text-blue-800 hover:bg-blue-200"
                 }`}
-                disabled={selectedOrder.status === "completed"}
+                disabled={selectedOrder.status === "Dikirim"}
+              >
+                Dikirim
+              </button>
+
+              <button
+                onClick={() => handleUpdateStatus(selectedOrder.id, "Selesai")}
+                className={`px-3 py-2 rounded ${
+                  selectedOrder.status === "Selesai"
+                    ? "bg-blue-500 text-white"
+                    : "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                }`}
+                disabled={selectedOrder.status === "Selesai"}
               >
                 Selesai
               </button>
+
               <button
-  onClick={() => handleUpdateStatus(selectedOrder.id, "cancelled")}
-  className={`
-    px-3 py-2 rounded
-    ${selectedOrder.status === "cancelled"
-      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-      : "bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
-    }
-    transition-colors duration-200
-  `}
-  disabled={selectedOrder.status === "cancelled"}
->
-  Dibatalkan
-</button>
+                onClick={() =>
+                  handleUpdateStatus(selectedOrder.id, "Dibatalkan")
+                }
+                className={`
+                      px-3 py-2 rounded
+                      ${
+                        selectedOrder.status === "Dibatalkan"
+                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          : "bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
+                      }
+                      transition-colors duration-200
+                    `}
+                disabled={selectedOrder.status === "Dibatalkan"}
+              >
+                Dibatalkan
+              </button>
             </div>
+
+            {selectedOrder.payment_status === "Menunggu Verifikasi" && (
+              <div className="mt-4">
+                <button
+                  onClick={() => handleVerifyPayment(selectedOrder.id)}
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                >
+                  Verifikasi Pembayaran
+                </button>
+                <button
+                  onClick={() =>
+                    handleUpdatePaymentStatus(selectedOrder.id, "Dibatalkan")
+                  }
+                  className="ml-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+                >
+                  Tolak Pembayaran
+                </button>
+              </div>
+            )}
 
             <div className="flex justify-end">
               <button
