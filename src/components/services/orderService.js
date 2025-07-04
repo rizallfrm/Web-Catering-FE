@@ -95,7 +95,7 @@ const OrderService = {
           },
         }
       );
-      return response.data.order;
+      return response.data.data.order;
     } catch (error) {
       console.error("Error verifying payment:", error);
       throw error;
