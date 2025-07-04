@@ -11,7 +11,10 @@ const MenuManagement = () => {
     name: "",
     description: "",
     price: "",
+    category: "",
     image_url: "",
+    min_order: 1,
+    available: true,
   });
 
   const [imageFile, setImageFile] = useState(null);
@@ -67,7 +70,10 @@ const MenuManagement = () => {
       name: "",
       description: "",
       price: "",
+      category: "",
       image_url: "",
+      min_order: 1,
+      available: true,
     });
     setImageFile(null);
     setImagePreview(null);
@@ -77,80 +83,108 @@ const MenuManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       setIsSubmitting(true);
       setError(null);
-      
+
       // Cek apakah ada file gambar untuk diupload
       let imageUrl = formData.image_url;
-      
+
       // Validasi panjang URL - pastikan tidak melebihi 250 karakter
       if (imageUrl && imageUrl.length > 250) {
-        setError('URL gambar terlalu panjang. Maksimal 250 karakter.');
+        setError("URL gambar terlalu panjang. Maksimal 250 karakter.");
         setIsSubmitting(false);
         return;
       }
-      
+
       if (imageFile) {
         try {
           // Upload gambar
           console.log("Uploading image file:", imageFile);
           const uploadResult = await MenuService.uploadImage(imageFile);
           imageUrl = uploadResult.url;
-          
+
           // Validasi panjang URL hasil upload
           if (imageUrl && imageUrl.length > 250) {
-            throw new Error('URL gambar hasil upload terlalu panjang');
+            throw new Error("URL gambar hasil upload terlalu panjang");
           }
-          
+
           console.log("Image uploaded successfully:", imageUrl);
         } catch (uploadErr) {
           console.error("Error uploading image:", uploadErr);
           // Gunakan placeholder sederhana jika error
-          imageUrl ="https://placehold.co/300x200/FFD700/000000?text=dinner-table";
+          imageUrl =
+            "https://placehold.co/300x200/FFD700/000000?text=dinner-table";
         }
       }
-      
+
       // Persiapkan data menu
       const menuData = {
         ...formData,
         price: parseFloat(formData.price),
-        image_url: imageUrl
+        image_url: imageUrl,
       };
-      
+
       console.log("Submitting menu data:", menuData);
-      
+
       if (editingId) {
         console.log(`Updating menu with ID: ${editingId}`);
         await MenuService.updateMenu(editingId, menuData);
-        setSuccess('Menu berhasil diperbarui');
+        setSuccess("Menu berhasil diperbarui");
       } else {
         console.log("Creating new menu");
         await MenuService.createMenu(menuData);
-        setSuccess('Menu baru berhasil ditambahkan');
+        setSuccess("Menu baru berhasil ditambahkan");
       }
-      
+
       // Refresh daftar menu
       await fetchMenus();
-      
+
       // Reset form
       resetForm();
       setIsFormVisible(false);
-      
+
       // Hapus pesan sukses setelah 3 detik
       setTimeout(() => setSuccess(null), 3000);
-      
     } catch (err) {
       console.error("Error submitting menu:", err);
-      setError(editingId ? 'Gagal memperbarui menu' : 'Gagal membuat menu baru');
-      
+      setError(
+        editingId ? "Gagal memperbarui menu" : "Gagal membuat menu baru"
+      );
+
       // Tampilkan detail error jika ada
       if (err.response && err.response.data && err.response.data.message) {
-        setError(`${editingId ? 'Gagal memperbarui menu' : 'Gagal membuat menu baru'}: ${err.response.data.message}`);
+        setError(
+          `${
+            editingId ? "Gagal memperbarui menu" : "Gagal membuat menu baru"
+          }: ${err.response.data.message}`
+        );
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleToggleAvailability = async (menu) => {
+    try {
+      const updatedMenu = {
+        ...menu,
+        available: !menu.available,
+      };
+
+      await MenuService.updateMenu(menu.id, updatedMenu);
+      setSuccess(
+        `Menu "${menu.name}" sekarang ${
+          updatedMenu.available ? "tersedia" : "tidak tersedia"
+        }`
+      );
+      fetchMenus();
+
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error("Error updating availability:", err);
+      setError("Gagal mengubah status ketersediaan menu");
     }
   };
 
@@ -161,6 +195,9 @@ const MenuManagement = () => {
       description: menu.description || "",
       price: String(menu.price),
       image_url: menu.image_url || "",
+      category: menu.category,
+      min_order: menu.min_order || 1,
+      available: menu.available || true,
     });
     setImagePreview(menu.image_url);
     setEditingId(menu.id);
@@ -222,7 +259,6 @@ const MenuManagement = () => {
           <h3 className="text-lg font-medium mb-4">
             {editingId ? "Edit Menu" : "Tambah Menu Baru"}
           </h3>
-
           <div className="mb-4">
             <label className="block mb-1">Nama Menu</label>
             <input
@@ -234,7 +270,57 @@ const MenuManagement = () => {
               required
             />
           </div>
-
+          {/* <div className="mb-4">
+            <label className="block mb-1">Kategori</label>
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="">Pilih kategori</option>
+              <option value="harian">Harian</option>
+              <option value="tumpeng">Tumpeng</option>
+              <option value="acara">Acara</option>
+              <option value="prasmanan">Prasmanan</option>
+            </select>
+          </div> */}{" "}
+          <div className="mb-4">
+            <label className="block mb-1">Kategori</label>
+            <input
+              type="text"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-1">Minimal Order</label>
+            <input
+              type="text"
+              name="min_order"
+              value={formData.min_order}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-1">Ketersediaan</label>
+            <select
+              name="available"
+              value={formData.available}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="true">Ya</option>
+              <option value="false">Tidak</option>
+            </select>
+          </div>
           <div className="mb-4">
             <label className="block mb-1">Deskripsi</label>
             <textarea
@@ -245,7 +331,6 @@ const MenuManagement = () => {
               rows="3"
             />
           </div>
-
           <div className="mb-4">
             <label className="block mb-1">Harga</label>
             <input
@@ -259,7 +344,6 @@ const MenuManagement = () => {
               required
             />
           </div>
-
           <div className="mb-4">
             <label className="block mb-1">Gambar</label>
             <div className="flex items-center">
@@ -299,7 +383,6 @@ const MenuManagement = () => {
               </div>
             )}
           </div>
-
           <div className="flex justify-end">
             <button
               type="button"
@@ -339,9 +422,12 @@ const MenuManagement = () => {
               <tr className="bg-gray-100">
                 <th className="px-4 py-2 text-left">Gambar</th>
                 <th className="px-4 py-2 text-left">Nama</th>
+                <th className="px-4 py-2 text-left">Kategori</th>
+
                 <th className="px-4 py-2 text-left">Deskripsi</th>
                 <th className="px-4 py-2 text-left">Harga</th>
                 <th className="px-4 py-2 text-left">Aksi</th>
+                <th className="px-4 py-2 text-left">Ketersediaan</th>
               </tr>
             </thead>
             <tbody>
@@ -368,6 +454,8 @@ const MenuManagement = () => {
                       )}
                     </td>
                     <td className="px-4 py-2">{menu.name}</td>
+                    <td className="px-4 py-2">{menu.category}</td>
+
                     <td className="px-4 py-2">{menu.description || "-"}</td>
                     <td className="px-4 py-2">
                       Rp {menu.price.toLocaleString()}
@@ -384,6 +472,23 @@ const MenuManagement = () => {
                         className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                       >
                         Hapus
+                      </button>
+                    </td>
+                    <td className="px-4 py-2">
+                      <span
+                        className={`inline-block px-2 py-1 rounded text-sm font-medium ${
+                          menu.available
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {menu.available ? "Nonaktifkan" : "Aktifkan"}
+                      </span>
+                      <button
+                        onClick={() => handleToggleAvailability(menu)}
+                        className="ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                      >
+                        Ubah
                       </button>
                     </td>
                   </tr>
