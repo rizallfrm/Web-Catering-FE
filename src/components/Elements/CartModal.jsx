@@ -28,6 +28,7 @@ const CartModal = ({ isOpen, onClose }) => {
     try {
       setIsLoading(true);
       const cartData = await CartService.getCart();
+      console.log("Fetched cart data:", cartData);
       setCart({
         ...cartData,
         items: cartData.items || [],
