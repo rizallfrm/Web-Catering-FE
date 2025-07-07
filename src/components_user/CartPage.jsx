@@ -58,10 +58,10 @@ const CartPage = () => {
                   <span>Subtotal:</span>
                   <span>Rp{calculateTotal().toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between mb-2">
+                {/* <div className="flex justify-between mb-2">
                   <span>Biaya Pengiriman:</span>
                   <span>Gratis</span>
-                </div>
+                </div> */}
                 <div className="flex justify-between font-bold text-lg mt-4 pt-4 border-t border-gray-200">
                   <span>Total:</span>
                   <span>Rp{calculateTotal().toLocaleString()}</span>
