@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import AdminService from "../../services/adminService";
 import OrderService from "../../services/orderService";
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+dayjs.locale("id");
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -10,11 +13,16 @@ const OrderManagement = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [order, setOrder] = useState(null);
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
+  const formatIndonesianDateTime = (dateString) => {
+    if (!dateString) return "Belum ditentukan";
+    return dayjs(dateString).format("dddd, D MMMM YYYY [pukul] HH:mm");
+  };
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
@@ -45,6 +53,27 @@ const OrderManagement = () => {
     }
   };
 
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+
+    const optionsDate = {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    };
+
+    const optionsTime = {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    };
+
+    return `${date.toLocaleDateString(
+      "id-ID",
+      optionsDate
+    )} pukul ${date.toLocaleTimeString("id-ID", optionsTime)}`;
+  };
+
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
       setIsLoading(true);
@@ -67,7 +96,7 @@ const OrderManagement = () => {
     } catch (err) {
       setError(
         "Gagal mengubah status pesanan: " +
-          (err.response?.data?.message || err.message || "Unknown error")
+          "Harus upload bukti pembayaran terlebih dahulu"
       );
       console.error("Error updating order status:", err);
     } finally {
@@ -140,33 +169,45 @@ const OrderManagement = () => {
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case "pending":
+      case "Menunggu Konfirmasi":
         return (
-          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded">
-            Menunggu
+          <span className="px-3 py-1 text-sm font-medium bg-yellow-100 text-yellow-800 rounded-full">
+            Menunggu Konfirmasi
           </span>
         );
-      case "processing":
+      case "Dikonfirmasi":
         return (
-          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">
+          <span className="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full">
+            Dikonfirmasi
+          </span>
+        );
+      case "Menunggu Verifikasi":
+        return (
+          <span className="px-3 py-1 text-sm font-medium bg-yellow-500 text-yellow-100 rounded-full">
+            Menunggu Verifikasi
+          </span>
+        );
+      case "Diproses":
+        return (
+          <span className="px-3 py-1 text-sm font-medium bg-purple-100 text-purple-800 rounded-full">
             Diproses
           </span>
         );
-      case "completed":
+      case "Selesai":
         return (
-          <span className="px-2 py-1 bg-green-100 text-green-800 rounded">
+          <span className="px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
             Selesai
           </span>
         );
-      case "cancelled":
+      case "Dibatalkan":
         return (
-          <span className="px-2 py-1 bg-red-100 text-red-800 rounded">
+          <span className="px-3 py-1 text-sm font-medium bg-red-100 text-red-800 rounded-full">
             Dibatalkan
           </span>
         );
       default:
         return (
-          <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded">
+          <span className="px-3 py-1 text-sm font-medium bg-gray-100 text-gray-800 rounded-full">
             {status || "Unknown"}
           </span>
         );
@@ -256,10 +297,11 @@ const OrderManagement = () => {
             className="w-full p-3 border rounded-md"
           >
             <option value="all">Semua Status</option>
-            <option value="pending">Pending</option>
-            <option value="processing">Diproses</option>
-            <option value="completed">Selesai</option>
-            <option value="cancelled">Dibatalkan</option>
+            <option value="Menunggu Konfirmasi">Menunggu Konfirmasi</option>
+            <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+            <option value="Diproses">Diproses</option>
+            <option value="Selesai">Selesai</option>
+            <option value="Dibatalkan">Dibatalkan</option>
           </select>
         </div>
       </div>
@@ -282,7 +324,7 @@ const OrderManagement = () => {
                   No. Pesanan
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Tanggal
+                  Tanggal Pesan
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Pelanggan
@@ -308,7 +350,7 @@ const OrderManagement = () => {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="text-sm text-gray-500">
-                      {formatDate(order.createdAt)}
+                      {dayjs(order.createdAt).format("D MMM YYYY HH:mm")}
                     </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
@@ -347,19 +389,25 @@ const OrderManagement = () => {
 
       {/* Modal Detail Pesanan */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-screen overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">
-                Detail Pesanan #{selectedOrder.id}
-              </h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white p-6 border-b border-gray-200 flex justify-between items-center z-10">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  Detail Pesanan #{selectedOrder.id}
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Dibuat pada{" "}
+                  {formatIndonesianDateTime(selectedOrder.createdAt)}
+                </p>
+              </div>
               <button
                 onClick={closeDetails}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-400 hover:text-gray-500 transition-colors"
               >
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
+                  className="w-6 h-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -374,224 +422,620 @@ const OrderManagement = () => {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <h3 className="text-lg font-medium mb-2">Informasi Pesanan</h3>
-                <div className="bg-gray-50 p-4 rounded">
-                  <div className="mb-2">
-                    <span className="text-gray-600">Tanggal:</span>
-                    <span className="ml-2 font-medium">
-                      {formatDate(selectedOrder.delivery_date)}
-                    </span>
-                  </div>
-                  <div className="mb-2">
-                    <span className="text-gray-600">Status Pesanan:</span>
-                    <span className="ml-2">
-                      {getStatusBadge(selectedOrder.status)}
-                    </span>
-                  </div>
-                  <div className="mb-2">
-                    <span className="text-gray-600">Status Pembayaran:</span>
-                    <span className="ml-2">
-                      {getStatusBadge(selectedOrder.payment_status)}
-                    </span>
-                  </div>
-                  <div className="mb-2">
-                    <span className="text-gray-600">Alamat Pengiriman:</span>
-                    <span className="ml-2">
-                      {getStatusBadge(selectedOrder.delivery_address)}
-                    </span>
-                  </div>
-                  <div className="mb-2">
-                    <span className="text-gray-600">Nomor WhatsApp:</span>
-                    <span className="ml-2">
-                      {getStatusBadge(selectedOrder.wa_number)}
-                    </span>
-                  </div>
-                  <div className="mb-2">
-                    <span className="text-gray-600">Notes:</span>
-                    <span className="ml-2">
-                      {getStatusBadge(selectedOrder.delivery_notes)}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Total:</span>
-                    <span className="ml-2 font-medium">
-                      Rp{" "}
-                      {selectedOrder.total_price
-                        ? selectedOrder.total_price.toLocaleString()
-                        : "0"}
-                    </span>
-                  </div>
-                </div>
-              </div>
+            <div className="p-6">
+              {/* Order Summary Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {/* Order Information */}
+                <div className="bg-gray-50 p-5 rounded-lg border border-gray-100">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg
+                      className="w-5 h-5 mr-2 text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      />
+                    </svg>
+                    Informasi Pesanan
+                  </h3>
 
-              <div>
-                <h3 className="text-lg font-medium mb-2">
-                  Informasi Pelanggan
-                </h3>
-                <div className="bg-gray-50 p-4 rounded">
-                  <div className="mb-2">
-                    <span className="text-gray-600">Nama:</span>
-                    <span className="ml-2 font-medium">
-                      {selectedOrder.User?.name || "N/A"}
-                    </span>
-                  </div>
-                  <div className="mb-2">
-                    <span className="text-gray-600">Email:</span>
-                    <span className="ml-2">
-                      {selectedOrder.User?.email || "N/A"}
-                    </span>
-                  </div>
-                  {/* Tambahkan informasi pelanggan lainnya jika tersedia */}
-                </div>
-              </div>
-            </div>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">
+                        Tanggal & Jam Pengantaran
+                      </p>
+                      <p className="font-medium">
+                        {formatIndonesianDateTime(selectedOrder.delivery_date)}
+                      </p>
+                    </div>
 
-            <h3 className="text-lg font-medium mb-3">Item Pesanan</h3>
-            <div className="overflow-x-auto mb-6">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Item
-                    </th>
-                    <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Kategori
-                    </th>
-                    <th className="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Harga
-                    </th>
-                    <th className="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Jumlah
-                    </th>
-                    <th className="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Subtotal
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {selectedOrder.OrderItems &&
-                  selectedOrder.OrderItems.length > 0 ? (
-                    selectedOrder.OrderItems.map((item) => (
-                      <tr key={item.id}>
-                        <td className="px-4 py-2">
-                          <div className="flex items-center">
-                            {item.Menu?.image_url && (
-                              <img
-                                src={item.Menu.image_url}
-                                alt={item.Menu.name}
-                                className="w-12 h-12 object-cover rounded mr-3"
-                              />
-                            )}
-                            <div>
-                              <div className="font-medium">
-                                {item.Menu?.name || `Menu ID: ${item.menu_id}`}
+                    {selectedOrder.weekly_schedule && (
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">
+                          Jadwal Pengantaran Harian
+                        </p>
+                        <div className="space-y-2">
+                          {selectedOrder.weekly_schedule.map(
+                            (schedule, index) => (
+                              <div key={index} className="flex justify-between">
+                                <span className="capitalize font-medium">
+                                  {schedule.day}:
+                                </span>
+                                <span className="text-gray-700">
+                                  {dayjs(schedule.datetime).format(
+                                    "dddd, D MMMM YYYY [pukul] HH:mm"
+                                  )}
+                                </span>
                               </div>
-                              <div className="text-sm text-gray-500">
-                                Rp{" "}
-                                {item.Menu?.price?.toLocaleString("id-ID") ||
-                                  "0"}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-right">
-                          {item.Menu?.category || "N/A"}
-                        </td>
-                        <td className="px-4 py-2 text-right">
-                          Rp{" "}
-                          {item.price
-                            ? item.price.toLocaleString("id-ID")
-                            : "0"}
-                        </td>
-                        <td className="px-4 py-2 text-right">
-                          {item.quantity}
-                        </td>
-                        <td className="px-4 py-2 text-right font-medium">
-                          Rp{" "}
-                          {((item.price || 0) * item.quantity).toLocaleString(
-                            "id-ID"
+                            )
                           )}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="4"
-                        className="px-4 py-2 text-center text-gray-500"
-                      >
-                        Tidak ada item pesanan
-                      </td>
-                    </tr>
-                  )}
-                  <tr className="bg-gray-50">
-                    <td
-                      colSpan="4"
-                      className="px-4 py-2  font-semibold"
-                    >
-                      Total
-                    </td>
-                    <td className="px-4 py-2 text-right font-semibold">
-                      Rp{" "}
-                      {selectedOrder.total_price
-                        ? selectedOrder.total_price.toLocaleString()
-                        : "0"}
-                    </td>
-                  </tr>
-                </tbody>
+                        </div>
+                      </div>
+                    )}
 
-                {/*Bukti Pembayaran */}
-                <h3 className="text-lg font-medium mb-3">Bukti Pembayaran</h3>
-                {selectedOrder.proof_image_url ? (
-                  <div className="mb-6">
-                    <button
-                      onClick={() => {
-                        const dialog = document.getElementById("imageDialog");
-                        dialog.querySelector("img").src =
-                          selectedOrder.proof_image_url;
-                        dialog.showModal();
-                      }}
-                      className="w-full"
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">
+                          Status Pesanan
+                        </p>
+                        <div>{getStatusBadge(selectedOrder.status)}</div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">
+                          Status Pembayaran
+                        </p>
+                        <div>
+                          {getStatusBadge(selectedOrder.payment_status)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">
+                        Alamat Pengiriman
+                      </p>
+                      <p className="font-medium">
+                        {selectedOrder.delivery_address}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">
+                        Nomor WhatsApp
+                      </p>
+                      <p className="font-medium">{selectedOrder.wa_number}</p>
+                    </div>
+
+                    {selectedOrder.delivery_notes && (
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Catatan</p>
+                        <p className="font-medium">
+                          {selectedOrder.delivery_notes}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="pt-4 border-t border-gray-200">
+                      <p className="text-sm text-gray-500 mb-1">
+                        Total Pembayaran
+                      </p>
+                      <p className="text-xl font-bold text-gray-800">
+                        Rp{" "}
+                        {selectedOrder.total_price?.toLocaleString("id-ID") ||
+                          "0"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Customer Information */}
+                <div className="bg-gray-50 p-5 rounded-lg border border-gray-100">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg
+                      className="w-5 h-5 mr-2 text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                    Informasi Pelanggan
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Nama</p>
+                      <p className="font-medium">
+                        {selectedOrder.User?.name || "N/A"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Email</p>
+                      <p className="font-medium">
+                        {selectedOrder.User?.email || "N/A"}
+                      </p>
+                    </div>
+
+                    {selectedOrder.User?.phone && (
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Telepon</p>
+                        <p className="font-medium">
+                          {selectedOrder.User.phone}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Items Section */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <svg
+                    className="w-5 h-5 mr-2 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                  Item Pesanan
+                </h3>
+
+                <div className="overflow-hidden border border-gray-200 rounded-lg">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Produk
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Harga
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Jumlah
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Subtotal
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {selectedOrder.OrderItems?.length > 0 ? (
+                        selectedOrder.OrderItems.map((item) => (
+                          <tr key={item.id}>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center">
+                                {item.Menu?.image_url && (
+                                  <img
+                                    src={item.Menu.image_url}
+                                    alt={item.Menu.name}
+                                    className="w-10 h-10 object-cover rounded-md mr-3"
+                                  />
+                                )}
+                                <div>
+                                  <div className="font-medium text-gray-900">
+                                    {item.Menu?.name ||
+                                      `Menu ID: ${item.menu_id}`}
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    {item.Menu?.category || "N/A"}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-500">
+                              Rp {item.price?.toLocaleString("id-ID") || "0"}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-500">
+                              {item.quantity}
+                            </td>
+                            <td className="px-6 py-4 text-right text-sm font-medium text-gray-900">
+                              Rp{" "}
+                              {(
+                                (item.price || 0) * item.quantity
+                              ).toLocaleString("id-ID")}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan="4"
+                            className="px-6 py-4 text-center text-sm text-gray-500"
+                          >
+                            Tidak ada item pesanan
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                    <tfoot className="bg-gray-50">
+                      <tr>
+                        <th
+                          colSpan="3"
+                          className="px-6 py-3 text-right text-sm font-medium text-gray-500"
+                        >
+                          Total
+                        </th>
+                        <th className="px-6 py-3 text-right text-sm font-medium text-gray-900">
+                          Rp{" "}
+                          {selectedOrder.total_price?.toLocaleString("id-ID") ||
+                            "0"}
+                        </th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+
+              {/* Payment Proof Section */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <svg
+                    className="w-5 h-5 mr-2 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  Bukti Pembayaran
+                </h3>
+
+                {selectedOrder.proof_image_url ? (
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="flex justify-between items-center mb-3">
+                      <p className="text-sm text-gray-500">
+                        Upload pada: {formatDate(selectedOrder.updatedAt)}
+                      </p>
+                      <button
+                        onClick={() =>
+                          window.open(selectedOrder.proof_image_url, "_blank")
+                        }
+                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                      >
+                        <svg
+                          className="w-4 h-4 mr-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                          />
+                        </svg>
+                        Unduh
+                      </button>
+                    </div>
+                    <div className="flex justify-center">
                       <img
                         src={selectedOrder.proof_image_url}
                         alt="Bukti Pembayaran"
-                        className="w-full max-w-md h-auto object-contain border rounded hover:opacity-90 transition-opacity"
+                        className="max-w-full h-auto max-h-64 object-contain rounded-md cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() =>
+                          window.open(selectedOrder.proof_image_url, "_blank")
+                        }
                       />
-                    </button>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Upload pada: {formatDate(selectedOrder.updatedAt)}
-                    </p>
+                    </div>
                   </div>
                 ) : (
-                  <div className="bg-gray-50 p-4 rounded mb-6">
-                    <p className="text-gray-500">Belum ada bukti pembayaran</p>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
+                    <svg
+                      className="mx-auto h-12 w-12 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <p className="mt-2 text-gray-500">
+                      Belum ada bukti pembayaran
+                    </p>
                   </div>
                 )}
-                <dialog
-                  id="imageDialog"
-                  className="backdrop:bg-black/80 rounded-lg"
-                >
-                  <div className="relative">
-                    <img
-                      src=""
-                      alt="Bukti Pembayaran (Perbesar)"
-                      className="max-h-[90vh]"
+              </div>
+
+              {/* Order Status Actions */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <svg
+                    className="w-5 h-5 mr-2 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
                     />
-                    <button
-                      onClick={() =>
-                        document.getElementById("imageDialog").close()
+                  </svg>
+                  Update Status Pesanan
+                </h3>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Apakah Anda yakin ingin mengkonfirmasi pesanan ini?"
+                        )
+                      ) {
+                        handleUpdateStatus(selectedOrder.id, "Dikonfirmasi");
                       }
-                      className="absolute top-2 right-2 bg-white/80 rounded-full p-1 hover:bg-white"
+                    }}
+                    className={`px-4 py-2 rounded-md flex items-center ${
+                      selectedOrder.status === "Dikonfirmasi"
+                        ? "bg-yellow-500 text-white"
+                        : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                    } transition-colors`}
+                    disabled={
+                      selectedOrder.status === "Dikonfirmasi" ||
+                      selectedOrder.status === "Dibatalkan" ||
+                      selectedOrder.status === "Selesai"
+                    }
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    Konfirmasi
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Apakah Anda yakin ingin memproses pesanan ini?"
+                        )
+                      ) {
+                        handleUpdateStatus(selectedOrder.id, "Diproses");
+                      }
+                    }}
+                    className={`px-4 py-2 rounded-md flex items-center ${
+                      selectedOrder.status === "Diproses"
+                        ? "bg-blue-500 text-white"
+                        : "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                    } transition-colors`}
+                    disabled={
+                      selectedOrder.status === "Diproses" ||
+                      selectedOrder.status === "Dibatalkan" ||
+                      selectedOrder.status === "Selesai"
+                    }
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                    Diproses
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Apakah Anda yakin ingin mengirim pesanan ini?"
+                        )
+                      ) {
+                        handleUpdateStatus(selectedOrder.id, "Dikirim");
+                      }
+                    }}
+                    className={`px-4 py-2 rounded-md flex items-center ${
+                      selectedOrder.status === "Dikirim"
+                        ? "bg-blue-500 text-white"
+                        : "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                    } transition-colors`}
+                    disabled={
+                      selectedOrder.status === "Dikirim" ||
+                      selectedOrder.status === "Dibatalkan" ||
+                      selectedOrder.status === "Selesai"
+                    }
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                    Dikirim
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Apakah Anda yakin ingin menyelesaikan pesanan ini? Pesanan tidak dapat diubah setelah diselesaikan."
+                        )
+                      ) {
+                        handleUpdateStatus(selectedOrder.id, "Selesai");
+                      }
+                    }}
+                    className={`px-4 py-2 rounded-md flex items-center ${
+                      selectedOrder.status === "Selesai"
+                        ? "bg-green-500 text-white"
+                        : "bg-green-100 text-green-800 hover:bg-green-200"
+                    } transition-colors`}
+                    disabled={
+                      selectedOrder.status === "Selesai" ||
+                      selectedOrder.status === "Dibatalkan"
+                    }
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    Selesai
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Apakah Anda yakin ingin membatalkan pesanan ini? Pesanan tidak dapat dipulihkan setelah dibatalkan."
+                        )
+                      ) {
+                        handleUpdateStatus(selectedOrder.id, "Dibatalkan");
+                      }
+                    }}
+                    className={`px-4 py-2 rounded-md flex items-center ${
+                      selectedOrder.status === "Dibatalkan"
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-red-100 text-red-800 hover:bg-red-200"
+                    } transition-colors`}
+                    disabled={
+                      selectedOrder.status === "Dibatalkan" ||
+                      selectedOrder.status === "Selesai"
+                    }
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    Dibatalkan
+                  </button>
+                </div>
+              </div>
+
+              {/* Payment Verification */}
+              {selectedOrder.payment_status === "Menunggu Verifikasi" && (
+                <div className="mb-8 pt-6 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg
+                      className="w-5 h-5 mr-2 text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                      />
+                    </svg>
+                    Verifikasi Pembayaran
+                  </h3>
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={() => handleVerifyPayment(selectedOrder.id)}
+                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md flex items-center transition-colors"
                     >
                       <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
+                        className="w-4 h-4 mr-2"
                         fill="none"
-                        viewBox="0 0 24 24"
                         stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      Verifikasi Pembayaran
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        handleUpdatePaymentStatus(
+                          selectedOrder.id,
+                          "Dibatalkan"
+                        )
+                      }
+                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md flex items-center transition-colors"
+                    >
+                      <svg
+                        className="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
                         <path
                           strokeLinecap="round"
@@ -600,108 +1044,21 @@ const OrderManagement = () => {
                           d="M6 18L18 6M6 6l12 12"
                         />
                       </svg>
+                      Tolak Pembayaran
                     </button>
                   </div>
-                </dialog>
-              </table>
-            </div>
+                </div>
+              )}
 
-            <h3 className="text-lg font-medium mb-3">Update Status Pesanan</h3>
-            <div className="flex flex-wrap gap-2 mb-6">
-              <button
-                onClick={() =>
-                  handleUpdateStatus(selectedOrder.id, "Dikonfirmasi")
-                }
-                className={`px-3 py-2 rounded ${
-                  selectedOrder.status === "Dikonfirmasi"
-                    ? "bg-yellow-500 text-white"
-                    : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
-                }`}
-                disabled={selectedOrder.status === "Dikonfirmasi"}
-              >
-                Konfirmasi
-              </button>
-
-              <button
-                onClick={() => handleUpdateStatus(selectedOrder.id, "Diproses")}
-                className={`px-3 py-2 rounded ${
-                  selectedOrder.status === "Diproses"
-                    ? "bg-blue-500 text-white"
-                    : "bg-blue-100 text-blue-800 hover:bg-blue-200"
-                }`}
-                disabled={selectedOrder.status === "Diproses"}
-              >
-                Diproses
-              </button>
-              <button
-                onClick={() => handleUpdateStatus(selectedOrder.id, "Dikirim")}
-                className={`px-3 py-2 rounded ${
-                  selectedOrder.status === "Dikirim"
-                    ? "bg-blue-500 text-white"
-                    : "bg-blue-100 text-blue-800 hover:bg-blue-200"
-                }`}
-                disabled={selectedOrder.status === "Dikirim"}
-              >
-                Dikirim
-              </button>
-
-              <button
-                onClick={() => handleUpdateStatus(selectedOrder.id, "Selesai")}
-                className={`px-3 py-2 rounded ${
-                  selectedOrder.status === "Selesai"
-                    ? "bg-blue-500 text-white"
-                    : "bg-blue-100 text-blue-800 hover:bg-blue-200"
-                }`}
-                disabled={selectedOrder.status === "Selesai"}
-              >
-                Selesai
-              </button>
-
-              <button
-                onClick={() =>
-                  handleUpdateStatus(selectedOrder.id, "Dibatalkan")
-                }
-                className={`
-                      px-3 py-2 rounded
-                      ${
-                        selectedOrder.status === "Dibatalkan"
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
-                      }
-                      transition-colors duration-200
-                    `}
-                disabled={selectedOrder.status === "Dibatalkan"}
-              >
-                Dibatalkan
-              </button>
-            </div>
-
-            {selectedOrder.payment_status === "Menunggu Verifikasi" && (
-              <div className="mt-4">
+              {/* Close Button */}
+              <div className="flex justify-end">
                 <button
-                  onClick={() => handleVerifyPayment(selectedOrder.id)}
-                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                  onClick={closeDetails}
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
                 >
-                  Verifikasi Pembayaran
-                </button>
-                <button
-                  onClick={() =>
-                    handleUpdatePaymentStatus(selectedOrder.id, "Dibatalkan")
-                  }
-                  className="ml-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-                >
-                  Tolak Pembayaran
+                  Tutup
                 </button>
               </div>
-            )}
-
-            <div className="flex justify-end">
-              <button
-                onClick={closeDetails}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded"
-              >
-                Tutup
-              </button>
             </div>
           </div>
         </div>
