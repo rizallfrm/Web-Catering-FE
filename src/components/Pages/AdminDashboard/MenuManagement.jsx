@@ -270,7 +270,7 @@ const MenuManagement = () => {
               required
             />
           </div>
-          {/* <div className="mb-4">
+          <div className="mb-4">
             <label className="block mb-1">Kategori</label>
             <select
               name="category"
@@ -280,13 +280,12 @@ const MenuManagement = () => {
               required
             >
               <option value="">Pilih kategori</option>
-              <option value="harian">Harian</option>
-              <option value="tumpeng">Tumpeng</option>
-              <option value="acara">Acara</option>
-              <option value="prasmanan">Prasmanan</option>
+              <option value="Harian">Harian</option>
+              <option value="Acara">Acara</option>
+              <option value="Prasmanan">Prasmanan</option>
             </select>
-          </div> */}{" "}
-          <div className="mb-4">
+          </div>{" "}
+          {/* <div className="mb-4">
             <label className="block mb-1">Kategori</label>
             <input
               type="text"
@@ -296,7 +295,7 @@ const MenuManagement = () => {
               className="w-full p-2 border rounded"
               required
             />
-          </div>
+          </div> */}
           <div className="mb-4">
             <label className="block mb-1">Minimal Order</label>
             <input
