@@ -68,7 +68,7 @@ const OrderService = {
   cancelOrder: async (orderId) => {
     try {
       const response = await API.put(`/orders/${orderId}/cancel`);
-      return response.data;
+      return response.data.data.order;
     } catch (error) {
       throw error;
     }
