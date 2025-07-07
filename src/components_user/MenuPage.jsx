@@ -61,7 +61,7 @@ const MenuPage = () => {
         {filteredItems.map(item => (
           <MenuItemCard 
             key={item.id}
-            item={item}
+            item={item} menuType="daily" 
             onAddToCart={handleAddToCart}
           />
         ))}
