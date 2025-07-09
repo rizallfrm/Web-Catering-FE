@@ -63,8 +63,7 @@ Mohon untuk segera dikonfirmasi yaa. Terima kasih 🙏
     return encodeURIComponent(message.trim());
   };
 
-
-const whatsappTemplateProcess = (order) => {
+  const whatsappTemplateProcess = (order) => {
     const orderId = order.id;
     const totalPrice = order.total_price
       ? order.total_price.toLocaleString("id-ID")
@@ -107,7 +106,6 @@ ${items}
 
 Terima kasih atas bantuannya 🙏
 `;
-
 
     // Encode to URI for WhatsApp
     return encodeURIComponent(message.trim());
@@ -288,8 +286,10 @@ Terima kasih atas bantuannya 🙏
                 )}
               </div>
               <div className="ml-3">
-                <p className="font-medium">Pesanan Menunggu</p>
-                <p className="text-sm text-gray-500"></p>
+                <p className="font-medium">Pesanan Menunggu Pembayaran</p>
+                <p className="text-sm text-gray-500">
+                  Pesanan Anda sedang menunggu pembayaran
+                </p>{" "}
               </div>
             </div>
 
