@@ -1,7 +1,15 @@
-import React from 'react';
-
+import React from "react";
+import authService from "../components/services/authService";
 const MenuItemCard = ({ item, onAddToCart }) => {
-  const { name, description, price, image_url, category, min_order, available } = item;
+  const {
+    name,
+    description,
+    price,
+    image_url,
+    category,
+    min_order,
+    available,
+  } = item;
 
   const handleAddClick = () => {
     if (available) {
@@ -10,9 +18,11 @@ const MenuItemCard = ({ item, onAddToCart }) => {
   };
 
   return (
-    <div className={`group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-gray-200 hover:-translate-y-2 relative ${
-      !available ? 'opacity-60 pointer-events-none' : ''
-    }`}>
+    <div
+      className={`group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-gray-200 hover:-translate-y-2 relative ${
+        !available ? "opacity-60 pointer-events-none" : ""
+      }`}
+    >
       {/* Overlay untuk item tidak tersedia */}
       {!available && (
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900/30 to-gray-900/60 flex items-center justify-center z-20 backdrop-blur-sm">
@@ -27,14 +37,14 @@ const MenuItemCard = ({ item, onAddToCart }) => {
       {/* Container gambar */}
       <div className="relative h-56 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
         <img
-          src={image_url || '/images/default-food.jpg'}
+          src={image_url || "/images/default-food.jpg"}
           alt={name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
-        
+
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        
+
         {/* Badge kategori */}
         <div className="absolute top-4 right-4">
           <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-white/90 backdrop-blur-sm text-gray-800 shadow-lg border border-white/50">
@@ -74,19 +84,41 @@ const MenuItemCard = ({ item, onAddToCart }) => {
             disabled={!available}
             className={`group/btn relative overflow-hidden px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg ${
               available
-                ? 'bg-gradient-to-r from-orange-400 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-orange-500/25 hover:shadow-orange-500/40'
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-gray-200/50'
+                ? "bg-gradient-to-r from-orange-400 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-orange-500/25 hover:shadow-orange-500/40"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed shadow-gray-200/50"
             }`}
           >
             {available && (
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700"></div>
             )}
-            <span className="relative flex items-center space-x-2">
+            <span
+              className="relative flex items-center space-x-2 cursor-pointer"
+              onClick={() => {
+                if (!authService.isAuthenticated()) {
+                  alert("Silakan login terlebih dahulu.");
+                  window.location.href = "/login";
+                  return;
+                }
+
+                // Lanjutkan proses Tambah jika sudah login
+                console.log("Tambah item");
+              }}
+            >
               {available ? (
                 <>
                   <span>Tambah</span>
-                  <svg className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <svg
+                    className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform duration-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
                   </svg>
                 </>
               ) : (
