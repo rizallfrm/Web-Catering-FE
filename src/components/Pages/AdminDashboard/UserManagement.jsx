@@ -181,7 +181,7 @@ const UserManagement = () => {
               <tr className="bg-gray-100">
                 <th className="px-4 py-2 text-left">Nama</th>
                 <th className="px-4 py-2 text-left">Email</th>
-                <th className="px-4 py-2 text-left">Role</th>
+                {/* <th className="px-4 py-2 text-left">Role</th> */}
                 {/* <th className="px-4 py-2 text-left">Status</th> */}
                 <th className="px-4 py-2 text-left">Aksi</th>
               </tr>
@@ -196,7 +196,7 @@ const UserManagement = () => {
                   <tr key={user.id} className="border-b">
                     <td className="px-4 py-2">{user.name || '-'}</td>
                     <td className="px-4 py-2">{user.email}</td>
-                    <td className="px-4 py-2">
+                    {/* <td className="px-4 py-2">
                       {user.id === currentUser?.id ? (
                         <span className={`px-2 py-1 rounded ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
                           {user.role || 'user'}
@@ -212,7 +212,7 @@ const UserManagement = () => {
                           <option value="admin">admin</option>
                         </select>
                       )}
-                    </td>
+                    </td> */}
                     {/* <td className="px-4 py-2">
                       {user.id === currentUser?.id ? (
                         <span className="px-2 py-1 rounded bg-green-100 text-green-800">
@@ -286,7 +286,7 @@ const UserManagement = () => {
                 />
               </div>
               
-              <div className="mb-4">
+              {/* <div className="mb-4">
                 <label className="block mb-1">Role</label>
                 <select
                   name="role"
@@ -299,7 +299,7 @@ const UserManagement = () => {
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              
+               */}
               {/* <div className="mb-6">
                 <label className="flex items-center">
                   <input
