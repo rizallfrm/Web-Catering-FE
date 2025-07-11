@@ -159,7 +159,7 @@ const TentangKami = () => {
         </section>
 
         {/* Tim Kami with animation */}
-        <section
+        {/* <section
           className={`mb-16 bg-white rounded-lg shadow-md p-8 transition-all duration-1000 delay-600 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
           }`}
@@ -170,10 +170,10 @@ const TentangKami = () => {
             kuliner dan event. Dipimpin oleh Chef Berpengalaman yang telah
             mendalami berbagai masakan tradisional dan internasional.
           </p>
-        </section>
+        </section> */}
 
         {/* Call to Action with animation */}
-        <div
+        {/* <div
           className={`bg-amber-500 text-white rounded-lg shadow-md p-8 text-center transition-all duration-1000 delay-750 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
           }`}
@@ -189,7 +189,7 @@ const TentangKami = () => {
           >
             Hubungi Kami
           </Link>
-        </div>
+        </div> */}
       </div>
       <style jsx>{`
         @keyframes progress {

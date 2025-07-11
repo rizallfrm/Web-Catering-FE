@@ -4,8 +4,8 @@ import Button from "../Elements/Button";
 
 const images = [
   "/public/hero-bg.jpg",
-  "/public/hero-bg2.jpg",
-  "/public/hero-bg3.jpg",
+  "/public/herobg2.jpg",
+  "/public/herobg3.jpg",
 ];
 
 const Hero = () => {
@@ -80,7 +80,7 @@ const Hero = () => {
                 Lihat Menu
               </Button>
             </Link>
-            <Link to="/contact">
+            <Link to="/kontak">
               <Button 
                 className="px-8 py-3 text-base rounded-full bg-transparent border-2 border-white hover:bg-white/10 transition-all duration-300 transform hover:scale-105"
               >

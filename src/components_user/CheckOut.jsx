@@ -290,7 +290,10 @@ const DailyScheduleForm = ({
   onDayDateChange,
   onDayTimeChange,
 }) => {
-  // Fungsi untuk validasi tanggal sesuai hari
+  const now = dayjs();
+  const currentHour = now.hour();
+  const currentMinute = now.minute();
+
   const validateDateForDay = (day, date) => {
     const dayIndex = [
       "minggu",
@@ -305,86 +308,116 @@ const DailyScheduleForm = ({
     return dayIndex === selectedDayIndex;
   };
 
+  const isTimeDisabled = (day, time) => {
+    const selectedDate = weeklySchedule[day]?.date;
+    if (!selectedDate) return false;
+
+    const isToday = dayjs(selectedDate).isSame(now, "day");
+    if (!isToday) return false;
+
+    const [hours, minutes] = time.split(":").map(Number);
+    return (
+      hours < currentHour || (hours === currentHour && minutes <= currentMinute)
+    );
+  };
+
   return (
     <div className="mb-4">
       <label className="block text-gray-700 mb-2">
         Jadwal Pengantaran Harian <span className="text-red-500">*</span>
       </label>
       <div className="space-y-4">
-        {Object.entries(weeklySchedule).map(([day, data]) => (
-          <div key={day} className="flex flex-col space-y-2">
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={data.selected}
-                onChange={(e) => {
-                  const isChecked = e.target.checked;
-                  onDaySelection(day, isChecked);
+        {Object.entries(weeklySchedule).map(([day, data]) => {
+          const nextDate = getNextDateForDay(day);
+          const isToday = nextDate.isSame(now, "day");
 
-                  // Set tanggal otomatis saat dicentang
-                  if (isChecked) {
-                    const nextDate = getNextDateForDay(day);
-                    onDayDateChange(day, nextDate.format("YYYY-MM-DD"));
-                    onDayTimeChange(day, "07:00");
-                  }
-                }}
-              />
-              <span className="capitalize">{day}</span>
-            </label>
+          return (
+            <div key={day} className="flex flex-col space-y-2">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={data.selected}
+                  onChange={(e) => {
+                    const isChecked = e.target.checked;
+                    onDaySelection(day, isChecked);
 
-            {data.selected && (
-              <div className="flex flex-col space-y-2 ml-6 bg-gray-50 p-3 rounded-md">
-                {/* Tampilkan nama hari dalam bahasa Indonesia */}
-                <div className="text-sm font-medium">
-                  Hari: {formatIndonesianDate(data.date).split(",")[0]}
-                </div>
+                    if (isChecked) {
+                      onDayDateChange(day, nextDate.format("YYYY-MM-DD"));
+                      // Set waktu default ke jam berikutnya jika hari ini
+                      const defaultTime = isToday
+                        ? `${currentHour + 1}:${currentMinute
+                            .toString()
+                            .padStart(2, "0")}`
+                        : "07:00";
+                      onDayTimeChange(day, defaultTime);
+                    }
+                  }}
+                />
+                <span className="capitalize">{day}</span>
+              </label>
 
-                <div className="grid grid-cols-2 gap-2">
-                  {/* Input Tanggal */}
-                  <div>
-                    <label className="block text-sm text-gray-600 mb-1">
-                      Pilih Tanggal
-                    </label>
-                    <input
-                      type="date"
-                      value={data.date}
-                      onChange={(e) => {
-                        if (!validateDateForDay(day, e.target.value)) {
-                          alert(`Tanggal harus jatuh pada hari ${day}`);
-                          return;
+              {data.selected && (
+                <div className="flex flex-col space-y-2 ml-6 bg-gray-50 p-3 rounded-md">
+                  <div className="text-sm font-medium">
+                    Hari: {formatIndonesianDate(data.date).split(",")[0]}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">
+                        Pilih Tanggal
+                      </label>
+                      <input
+                        type="date"
+                        value={data.date}
+                        onChange={(e) => {
+                          if (!validateDateForDay(day, e.target.value)) {
+                            alert(`Tanggal harus jatuh pada hari ${day}`);
+                            return;
+                          }
+                          onDayDateChange(day, e.target.value);
+                        }}
+                        min={nextDate.format("YYYY-MM-DD")}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">
+                        Pilih Jam
+                      </label>
+                      <input
+                        type="time"
+                        value={data.time}
+                        onChange={(e) => onDayTimeChange(day, e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        min={
+                          isToday
+                            ? `${currentHour + 1}:${currentMinute
+                                .toString()
+                                .padStart(2, "0")}`
+                            : undefined
                         }
-                        onDayDateChange(day, e.target.value);
-                      }}
-                      min={getNextDateForDay(day).format("YYYY-MM-DD")}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                      required
-                    />
+                        required
+                      />
+                    </div>
                   </div>
 
-                  {/* Input Waktu */}
-                  <div>
-                    <label className="block text-sm text-gray-600 mb-1">
-                      Pilih Jam
-                    </label>
-                    <input
-                      type="time"
-                      value={data.time}
-                      onChange={(e) => onDayTimeChange(day, e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                      required
-                    />
+                  <div className="text-sm text-gray-600">
+                    Akan dikirim pada: {formatIndonesianDate(data.date)} jam{" "}
+                    {data.time}
+                    {isTimeDisabled(day, data.time) && (
+                      <span className="text-red-500 ml-2">
+                        (Waktu sudah lewat, harap pilih waktu lain)
+                      </span>
+                    )}
                   </div>
                 </div>
-
-                {/* Tampilkan tanggal lengkap */}
-                <div className="text-sm text-gray-600">
-                  Akan dikirim pada: {formatIndonesianDate(data.date)} jam{" "}
-                  {data.time}
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -392,13 +425,15 @@ const DailyScheduleForm = ({
 
 const SingleDateForm = ({ formData, handleChange }) => {
   const [selectedDay, setSelectedDay] = useState("");
+  const now = dayjs();
+  const currentHour = now.hour();
+  const currentMinute = now.minute();
+  const minOrderDate = now.add(2, 'day').format("YYYY-MM-DD"); // Minimal H+2 dari hari ini
 
   const handleDateChange = (e) => {
     const dateValue = e.target.value;
-    // Update form data
     handleChange(e);
 
-    // Update hari yang ditampilkan
     if (dateValue) {
       const dayName = dayjs(dateValue).format("dddd");
       setSelectedDay(dayName);
@@ -407,14 +442,42 @@ const SingleDateForm = ({ formData, handleChange }) => {
     }
   };
 
+  const isTodaySelected = formData.delivery_date 
+    ? dayjs(formData.delivery_date).isSame(now, 'day')
+    : false;
+
+  const isDateValid = formData.delivery_date 
+    ? dayjs(formData.delivery_date).isAfter(now.add(1, 'day'))
+    : false;
+
   return (
     <div className="mb-4">
       <label className="block text-gray-700 mb-2">
         Tanggal Pengantaran <span className="text-red-500">*</span>
       </label>
 
+      {/* Notifikasi minimal pemesanan H-2 */}
+      <div className="bg-yellow-50   border-l-4 border-yellow-400 p-4 mb-4 ">
+        <div className="flex ">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <p className="text-sm text-yellow-700">
+              Pemesanan minimal H-2 hari dari tanggal pengiriman. 
+              <br />
+              <span className="font-medium">
+                Hari ini {now.format("dddd, D MMMM YYYY")}, 
+                pesanan paling cepat dikirim {dayjs(minOrderDate).format("dddd, D MMMM YYYY")}.
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="flex flex-col space-y-2 ml-6 bg-gray-50 p-3 rounded-md">
-        {/* Tampilan Hari */}
         <div className="flex items-center">
           <span className="text-sm text-gray-600 mr-2">Hari:</span>
           {selectedDay ? (
@@ -427,7 +490,6 @@ const SingleDateForm = ({ formData, handleChange }) => {
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          {/* Input Tanggal */}
           <div>
             <label className="block text-sm text-gray-600 mb-1">
               Pilih Tanggal
@@ -437,13 +499,21 @@ const SingleDateForm = ({ formData, handleChange }) => {
               name="delivery_date"
               value={formData.delivery_date}
               onChange={handleDateChange}
-              min={dayjs().format("YYYY-MM-DD")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              min={minOrderDate}
+              className={`w-full px-3 py-2 border rounded-md ${
+                formData.delivery_date && !isDateValid
+                  ? "border-red-500 bg-red-50"
+                  : "border-gray-300"
+              }`}
               required
             />
+            {formData.delivery_date && !isDateValid && (
+              <p className="mt-1 text-sm text-red-600">
+                Tanggal pengiriman minimal H-2 hari dari hari ini. Pilih tanggal setelah {minOrderDate}.
+              </p>
+            )}
           </div>
 
-          {/* Input Waktu */}
           <div>
             <label className="block text-sm text-gray-600 mb-1">
               Pilih Jam
@@ -459,7 +529,6 @@ const SingleDateForm = ({ formData, handleChange }) => {
           </div>
         </div>
 
-        {/* Tampilkan info lengkap */}
         {formData.delivery_date && formData.delivery_time && (
           <div className="text-sm text-gray-600 mt-2">
             Akan dikirim pada:{" "}

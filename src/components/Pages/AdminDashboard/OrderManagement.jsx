@@ -882,8 +882,8 @@ const OrderManagement = () => {
                     }}
                     className={`px-4 py-2 rounded-md flex items-center ${
                       selectedOrder.status === "Dikirim"
-                        ? "bg-blue-500 text-white"
-                        : "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                        ? "bg-purple-700 text-white"
+                        : "bg-purple-100 text-purple-500 hover:bg-blue-200"
                     } transition-colors`}
                     disabled={
                       selectedOrder.status === "Dikirim" ||
