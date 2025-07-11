@@ -4,8 +4,8 @@ import Button from "../Elements/Button";
 
 const images = [
   "/public/hero-bg.jpg",
-  "/public/hero-bg2.jpg",
-  "/public/hero-bg3.jpg",
+  "/public/herobg2.jpg",
+  "/public/herobg3.jpg",
 ];
 
 const Hero = () => {
