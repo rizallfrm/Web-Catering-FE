@@ -84,7 +84,7 @@ const TentangKami = () => {
             memiliki kecintaan mendalam terhadap dunia kuliner.
           </p>
           <p className="text-gray-600">
-            Berawal dari hobi memasak, CateringKu didirikan dengan melayani
+            Berawal dari hobi memasak, Dapur Catering Mamake didirikan dengan melayani
             pesanan dari kerabat dan tetangga. Berkat kualitas dan cita rasa
             yang konsisten, kami terus berkembang hingga menjadi perusahaan
             catering yang dipercaya untuk menangani berbagai acara.
