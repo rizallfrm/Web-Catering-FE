@@ -189,8 +189,8 @@ const Kontak = () => {
               <div className="p-6">
                 <div className="space-y-3">
                   {[
-                    { day: "Senin - Jumat", hours: "08.00 - 17.00 WIB" },
-                    { day: "Sabtu", hours: "09.00 - 15.00 WIB" },
+                    { day: "Senin - Jumat", hours: "09.00 - 16.00 WIB" },
+                    { day: "Sabtu", hours: "09.00 - 16.00 WIB" },
                     { day: "Minggu", hours: "Tutup" },
                   ].map((schedule, idx) => (
                     <div
