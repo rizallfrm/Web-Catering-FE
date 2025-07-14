@@ -29,10 +29,11 @@ const Register = () => {
         firstName: data.firstName,
         lastName: data.lastName || "",
         email: data.email,
-        phone: data.phone,
-        address: data.address || "",
+        phone: data.phone.slice(0, 255),
+        address: data.address.slice(0, 255),
         password: data.password,
-      };
+      };console.log("Data to be sent:", userData);
+
 
       // Use AuthService for registration
       await AuthService.register(userData);
@@ -76,29 +77,29 @@ const Register = () => {
 
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 "> */}
-          <div className="">
-            <label
-              htmlFor="firstName"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Nama Depan
-            </label>
-            <input
-              id="firstName"
-              type="text"
-              autoComplete="given-name"
-              className={`mt-1 block w-full rounded-md shadow-sm focus:border-yellow-500 focus:ring-yellow-500 sm:text-sm p-2 border ${
-                errors.firstName ? "border-red-300" : "border-gray-300"
-              }`}
-              {...register("firstName", {
-                required: "Nama depan wajib diisi",
-              })}
-            />
-            {errors.firstName && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.firstName.message}
-              </p>
-            )}
+        <div className="">
+          <label
+            htmlFor="firstName"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Nama Depan
+          </label>
+          <input
+            id="firstName"
+            type="text"
+            autoComplete="given-name"
+            className={`mt-1 block w-full rounded-md shadow-sm focus:border-yellow-500 focus:ring-yellow-500 sm:text-sm p-2 border ${
+              errors.firstName ? "border-red-300" : "border-gray-300"
+            }`}
+            {...register("firstName", {
+              required: "Nama depan wajib diisi",
+            })}
+          />
+          {errors.firstName && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.firstName.message}
+            </p>
+          )}
           {/* </div> */}
         </div>
         <div>
@@ -169,42 +170,42 @@ const Register = () => {
         </div>
 
         <div>
-  <label
-    htmlFor="phone"
-    className="block text-sm font-medium text-gray-700"
-  >
-    Nomor Telepon
-  </label>
-  <input
-    id="phone"
-    type="tel"
-    autoComplete="tel"
-    className={`mt-1 block w-full rounded-md shadow-sm focus:border-yellow-500 focus:ring-yellow-500 sm:text-sm p-2 border ${
-      errors.phone ? "border-red-300" : "border-gray-300"
-    }`}
-    {...register("phone", {
-      required: "Nomor telepon wajib diisi",
-      pattern: {
-        value: /^[0-9+\-\s()]*$/,
-        message: "Format nomor telepon tidak valid",
-      },
-      validate: {
-        maxLength: (value) => 
-          value.replace(/[^0-9]/g, '').length <= 13 || 
-          "Nomor telepon maksimal 13 digit",
-        minLength: (value) =>
-          value.replace(/[^0-9]/g, '').length >= 10 ||
-          "Nomor telepon minimal 10 digit",
-        startsWithValid: (value) =>
-          /^(\+62|0)/.test(value) ||
-          "Nomor harus diawali dengan +62 atau 0"
-      }
-    })}
-  />
-  {errors.phone && (
-    <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
-  )}
-</div>
+          <label
+            htmlFor="phone"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Nomor Telepon
+          </label>
+          <input
+            id="phone"
+            type="tel"
+            autoComplete="tel"
+            className={`mt-1 block w-full rounded-md shadow-sm focus:border-yellow-500 focus:ring-yellow-500 sm:text-sm p-2 border ${
+              errors.phone ? "border-red-300" : "border-gray-300"
+            }`}
+            {...register("phone", {
+              required: "Nomor telepon wajib diisi",
+              pattern: {
+                value: /^[0-9+\-\s()]*$/,
+                message: "Format nomor telepon tidak valid",
+              },
+              validate: {
+                maxLength: (value) =>
+                  value.replace(/[^0-9]/g, "").length <= 13 ||
+                  "Nomor telepon maksimal 13 digit",
+                minLength: (value) =>
+                  value.replace(/[^0-9]/g, "").length >= 10 ||
+                  "Nomor telepon minimal 10 digit",
+                startsWithValid: (value) =>
+                  /^(\+62|0)/.test(value) ||
+                  "Nomor harus diawali dengan +62 atau 0",
+              },
+            })}
+          />
+          {errors.phone && (
+            <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
+          )}
+        </div>
         <div>
           <label
             htmlFor="password"
