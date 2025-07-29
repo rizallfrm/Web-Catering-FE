@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { ChevronDown, ChevronUp, Search, XCircle } from "lucide-react";
-import { Link } from "react-router-dom";
 
 const FAQAccordion = () => {
   const [openIndex, setOpenIndex] = useState(null);
@@ -129,14 +127,16 @@ const FAQAccordion = () => {
           <h2 className="text-3xl font-bold text-gray-800">Pertanyaan Umum</h2>
         </div>
         <p className="text-gray-600 max-w-2xl mx-auto mb-8">
-          Temukan jawaban untuk pertanyaan yang sering diajukan mengenai layanan
+          ❓ Temukan jawaban untuk pertanyaan yang sering diajukan mengenai layanan
           catering kami
         </p>
 
         {/* Search bar */}
         <div className="relative max-w-md mx-auto mb-10">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
           <input
             type="text"
@@ -150,7 +150,9 @@ const FAQAccordion = () => {
               onClick={handleClearSearch}
               className="absolute inset-y-0 right-0 pr-3 flex items-center"
             >
-              <XCircle className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+              <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           )}
         </div>
@@ -199,7 +201,9 @@ const FAQAccordion = () => {
                       : "bg-gray-100 text-gray-500"
                   }`}
                 >
-                  <ChevronDown className="w-5 h-5" />
+                  <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </div>
               </button>
 
@@ -215,12 +219,6 @@ const FAQAccordion = () => {
                     <span className="text-xs font-medium text-amber-600 bg-amber-100 px-2 py-1 rounded-full capitalize">
                       {faq.category}
                     </span>
-                    {/* <span className="ml-auto text-xs text-gray-500">
-                      Masih punya pertanyaan?
-                      <button className="ml-1 text-amber-600 hover:underline">
-                        Hubungi kami
-                      </button>
-                    </span> */}
                   </div>
                 </div>
               </div>
@@ -229,7 +227,9 @@ const FAQAccordion = () => {
         ) : (
           <div className="text-center py-8 bg-gray-50 rounded-lg">
             <div className="w-16 h-16 mx-auto mb-4 bg-amber-100 rounded-full flex items-center justify-center">
-              <Search className="h-8 w-8 text-amber-500" />
+              <svg className="h-8 w-8 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
             </div>
             <h3 className="text-lg font-medium text-gray-800 mb-2">
               Tidak ada hasil ditemukan
@@ -248,16 +248,17 @@ const FAQAccordion = () => {
       </div>
 
       {/* Contact callout */}
-      {/* <div className="mt-12 p-6 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl text-white text-center shadow-lg">
+      <div className="mt-12 p-6 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl text-white text-center shadow-lg">
         <h3 className="text-xl font-bold mb-2">Tidak menemukan jawaban?</h3>
         <p className="mb-4">Tim kami siap membantu menjawab pertanyaan Anda</p>
 
-        <Link to="/kontak">
-          <button className="px-6 py-2 bg-white text-amber-600 rounded-full font-medium hover:bg-gray-100 transition-colors duration-300 shadow-md">
-            Hubungi Kami
-          </button>
-        </Link>
-      </div> */}
+        <button 
+          onClick={() => window.open("https://wa.me/6289527308651", "_blank")}
+          className="px-6 py-2 bg-white text-amber-600 rounded-full font-medium hover:bg-gray-100 transition-colors duration-300 shadow-md"
+        >
+          Hubungi Kami
+        </button>
+      </div>
     </div>
   );
 };
