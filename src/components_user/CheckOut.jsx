@@ -3,11 +3,13 @@ import { useCart } from "../context/CartContext";
 import { Link, useNavigate } from "react-router-dom";
 import OrderService from "../components/services/orderService";
 import LoadingSpinner from "./LoadingSpinner";
+import SmartAddressInput from "../components/Address/SmartAddressInput";
 import { getNextDateForDay, formatIndonesianDate } from "../utils/dateUtils";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 
 dayjs.locale("id");
+
 const initialWeeklySchedule = {
   senin: { selected: false, date: "", time: "" },
   selasa: { selected: false, date: "", time: "" },
@@ -23,6 +25,7 @@ const initialFormData = {
   delivery_address: "",
   delivery_time: "",
   notes: "",
+  delivery_fee: 0,
 };
 
 const CheckoutPage = () => {
@@ -34,6 +37,8 @@ const CheckoutPage = () => {
   const [formData, setFormData] = useState(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [deliveryInfo, setDeliveryInfo] = useState(null);
+  const [isAddressValid, setIsAddressValid] = useState(true); // New state for address validation
 
   // Derived values
   const isAllHarian = cart.items.every(
@@ -43,11 +48,33 @@ const CheckoutPage = () => {
     (total, item) => total + (item.Menu?.price || 0) * item.quantity,
     0
   );
+  const totalWithDelivery = subtotal + (formData.delivery_fee || 0);
 
   // Handlers
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDeliveryFeeChange = (fee, info) => {
+    setFormData((prev) => ({ ...prev, delivery_fee: fee }));
+    setDeliveryInfo(info);
+  };
+
+  const handleAddressChange = (address) => {
+    setFormData((prev) => ({ ...prev, delivery_address: address }));
+  };
+
+  // New handler for address validation
+  const handleAddressValidationChange = (isValid) => {
+    setIsAddressValid(isValid);
+    if (!isValid) {
+      setError(
+        "Area yang dipilih berada di luar jangkauan layanan kami. Silakan pilih area lain yang tersedia."
+      );
+    } else if (error && error.includes("jangkauan")) {
+      setError(null); // Clear out of range error when address becomes valid
+    }
   };
 
   const handleDaySelection = (day, isChecked) => {
@@ -97,6 +124,30 @@ const CheckoutPage = () => {
       return false;
     }
 
+    // Validasi area delivery (NEW)
+    if (!isAddressValid) {
+      setError(
+        "Area pengiriman tidak valid atau berada di luar jangkauan layanan. Silakan pilih area yang tersedia."
+      );
+      return false;
+    }
+
+    // Validasi delivery fee
+    if (formData.delivery_fee === undefined || formData.delivery_fee < 0) {
+      setError(
+        "Biaya pengiriman belum terdeteksi. Silakan periksa alamat Anda."
+      );
+      return false;
+    }
+
+    // Validasi khusus untuk area di luar jangkauan
+    if (deliveryInfo?.is_out_of_range || deliveryInfo?.blocked) {
+      setError(
+        "Pesanan tidak dapat diproses karena area berada di luar jangkauan layanan kami."
+      );
+      return false;
+    }
+
     // Validasi khusus tipe pesanan
     if (isAllHarian) {
       const selectedDays = Object.entries(weeklySchedule).filter(
@@ -131,6 +182,7 @@ const CheckoutPage = () => {
     const payload = {
       wa_number: formData.wa_number,
       delivery_address: formData.delivery_address,
+      delivery_fee: formData.delivery_fee,
       notes: formData.notes,
       items: cart.items.map((item) => ({
         menu_id: item.menu_id || item.Menu?.id,
@@ -163,6 +215,7 @@ const CheckoutPage = () => {
 
     return payload;
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -202,14 +255,44 @@ const CheckoutPage = () => {
       return;
     }
 
-    const confirmed = window.confirm(
-      "Apakah Anda yakin ingin melakukan pemesanan?\nPastikan data pesanan Anda sudah benar."
-    );
+    // Enhanced confirmation with out of range check
+    if (!isAddressValid || deliveryInfo?.is_out_of_range) {
+      alert(
+        "Pesanan tidak dapat diproses karena alamat berada di luar jangkauan layanan kami. Silakan pilih alamat yang tersedia."
+      );
+      return;
+    }
+
+    // Show confirmation dengan breakdown harga
+    const confirmMessage = `
+Konfirmasi Pesanan:
+
+Subtotal Menu: Rp${subtotal.toLocaleString()}
+Biaya Pengiriman: ${
+      formData.delivery_fee === 0
+        ? "GRATIS"
+        : `Rp${formData.delivery_fee.toLocaleString()}`
+    }
+${deliveryInfo ? `Area: ${deliveryInfo.area_name || "Terdeteksi"}` : ""}
+Total: Rp${totalWithDelivery.toLocaleString()}
+
+Apakah Anda yakin ingin melakukan pemesanan?
+    `.trim();
+
+    const confirmed = window.confirm(confirmMessage);
 
     if (confirmed) {
       handleSubmit(e);
     }
   };
+
+  // Calculate if checkout should be disabled
+  const isCheckoutDisabled =
+    isSubmitting ||
+    cart.items.length === 0 ||
+    !isAddressValid ||
+    deliveryInfo?.is_out_of_range ||
+    deliveryInfo?.blocked;
 
   if (isCartLoading) return <LoadingSpinner />;
 
@@ -246,6 +329,17 @@ const CheckoutPage = () => {
             )}
 
             <form onSubmit={handleSubmit}>
+              {/* Smart Address Input - With validation callback */}
+              <div className="mb-6">
+                <SmartAddressInput
+                  onDeliveryFeeChange={handleDeliveryFeeChange}
+                  onAddressChange={handleAddressChange}
+                  // onValidationChange={handleAddressValidationChange}
+                  initialAddress={formData.delivery_address}
+                  initialFee={formData.delivery_fee}
+                />
+              </div>
+
               {isAllHarian ? (
                 <DailyScheduleForm
                   weeklySchedule={weeklySchedule}
@@ -264,20 +358,73 @@ const CheckoutPage = () => {
 
               {cart.items.length === 0 && <EmptyCartWarning />}
 
-              <button
-                type="button"
-                disabled={isSubmitting || cart.items.length === 0}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-md disabled:opacity-50"
-                onClick={handleOrderConfirmation}
-              >
-                {isSubmitting ? "Memproses..." : "Buat Pesanan"}
-              </button>
+              {/* Enhanced Order Button with Better Disabled State */}
+              <div className="space-y-3">
+                {/* Out of Range Warning */}
+                {(!isAddressValid || deliveryInfo?.is_out_of_range) && (
+                  <div className="bg-red-50 border border-red-500 rounded-md p-4">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-red-500 text-xl">🚫</span>
+                      <div>
+                        <p className="font-medium text-red-800">
+                          Pesanan Tidak Dapat Diproses
+                        </p>
+                        <p className="text-sm text-red-700">
+                          Area pengiriman berada di luar jangkauan layanan kami.
+                          Silakan pilih area yang tersedia untuk melanjutkan
+                          pemesanan.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  disabled={isCheckoutDisabled}
+                  className={`w-full py-3 rounded-md font-medium transition-colors ${
+                    isCheckoutDisabled
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-orange-500 hover:bg-orange-600 text-white"
+                  }`}
+                  onClick={handleOrderConfirmation}
+                  title={
+                    isCheckoutDisabled
+                      ? "Silakan lengkapi informasi pengiriman yang valid"
+                      : "Lanjutkan ke pemesanan"
+                  }
+                >
+                  {isSubmitting
+                    ? "Memproses..."
+                    : !isAddressValid || deliveryInfo?.is_out_of_range
+                    ? "Area Tidak Tersedia"
+                    : "Buat Pesanan"}
+                </button>
+
+                {/* Helper text for disabled state */}
+                {isCheckoutDisabled &&
+                  !isSubmitting &&
+                  cart.items.length > 0 && (
+                    <p className="text-sm text-gray-500 text-center">
+                      {!isAddressValid || deliveryInfo?.is_out_of_range
+                        ? "Pilih area pengiriman yang tersedia untuk melanjutkan"
+                        : "Lengkapi semua informasi yang diperlukan"}
+                    </p>
+                  )}
+              </div>
             </form>
           </div>
         </div>
 
         {/* Order Summary */}
-        <OrderSummary items={cart.items} subtotal={subtotal} />
+        <OrderSummary
+          items={cart.items}
+          subtotal={subtotal}
+          deliveryFee={formData.delivery_fee}
+          deliveryInfo={deliveryInfo}
+          total={totalWithDelivery}
+          isAddressValid={isAddressValid}
+        />
       </div>
     </div>
   );
@@ -426,9 +573,7 @@ const DailyScheduleForm = ({
 const SingleDateForm = ({ formData, handleChange }) => {
   const [selectedDay, setSelectedDay] = useState("");
   const now = dayjs();
-  const currentHour = now.hour();
-  const currentMinute = now.minute();
-  const minOrderDate = now.add(2, 'day').format("YYYY-MM-DD"); // Minimal H+2 dari hari ini
+  const minOrderDate = now.add(3, "day").format("YYYY-MM-DD"); // Minimal H+2 dari hari ini
 
   const handleDateChange = (e) => {
     const dateValue = e.target.value;
@@ -442,12 +587,8 @@ const SingleDateForm = ({ formData, handleChange }) => {
     }
   };
 
-  const isTodaySelected = formData.delivery_date 
-    ? dayjs(formData.delivery_date).isSame(now, 'day')
-    : false;
-
-  const isDateValid = formData.delivery_date 
-    ? dayjs(formData.delivery_date).isAfter(now.add(1, 'day'))
+  const isDateValid = formData.delivery_date
+    ? dayjs(formData.delivery_date).isAfter(now.add(1, "day"))
     : false;
 
   return (
@@ -457,20 +598,29 @@ const SingleDateForm = ({ formData, handleChange }) => {
       </label>
 
       {/* Notifikasi minimal pemesanan H-2 */}
-      <div className="bg-yellow-50   border-l-4 border-yellow-400 p-4 mb-4 ">
-        <div className="flex ">
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+        <div className="flex">
           <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            <svg
+              className="h-5 w-5 text-yellow-400"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
           </div>
           <div className="ml-3">
             <p className="text-sm text-yellow-700">
-              Pemesanan minimal H-2 hari dari tanggal pengiriman. 
+              Pemesanan minimal H-3 hari dari tanggal pengiriman.
               <br />
               <span className="font-medium">
-                Hari ini {now.format("dddd, D MMMM YYYY")}, 
-                pesanan paling cepat dikirim {dayjs(minOrderDate).format("dddd, D MMMM YYYY")}.
+                Hari ini {now.format("dddd, D MMMM YYYY")}, pesanan paling cepat
+                dikirim {dayjs(minOrderDate).format("dddd, D MMMM YYYY")}.
               </span>
             </p>
           </div>
@@ -509,7 +659,7 @@ const SingleDateForm = ({ formData, handleChange }) => {
             />
             {formData.delivery_date && !isDateValid && (
               <p className="mt-1 text-sm text-red-600">
-                Tanggal pengiriman minimal H-2 hari dari hari ini. Pilih tanggal setelah {minOrderDate}.
+                Tanggal pengiriman minimal H-2 hari dari hari ini.
               </p>
             )}
           </div>
@@ -542,6 +692,7 @@ const SingleDateForm = ({ formData, handleChange }) => {
     </div>
   );
 };
+
 const ContactForm = ({ formData, handleChange }) => (
   <>
     <div className="mb-4">
@@ -554,23 +705,8 @@ const ContactForm = ({ formData, handleChange }) => (
         name="wa_number"
         value={formData.wa_number}
         onChange={handleChange}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         placeholder="Contoh: 081234567890"
-        required
-      />
-    </div>
-
-    <div className="mb-4">
-      <label className="block text-gray-700 mb-2" htmlFor="delivery_address">
-        Alamat Pengantaran <span className="text-red-500">*</span>
-      </label>
-      <textarea
-        id="delivery_address"
-        name="delivery_address"
-        value={formData.delivery_address}
-        onChange={handleChange}
-        rows="3"
-        className="w-full px-3 py-2 border border-gray-300 rounded-md"
         required
       />
     </div>
@@ -585,8 +721,8 @@ const ContactForm = ({ formData, handleChange }) => (
         value={formData.notes}
         onChange={handleChange}
         rows="2"
-        className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        placeholder="Contoh: Tanpa sambal, antar jam 10 pagi"
+        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        placeholder="Contoh: Rumah warna biru"
       />
     </div>
   </>
@@ -606,7 +742,14 @@ const EmptyCartWarning = () => (
   </div>
 );
 
-const OrderSummary = ({ items, subtotal }) => (
+const OrderSummary = ({
+  items,
+  subtotal,
+  deliveryFee = 0,
+  deliveryInfo,
+  total,
+  isAddressValid,
+}) => (
   <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
     <h2 className="text-xl font-semibold mb-4">Ringkasan Pesanan</h2>
 
@@ -614,30 +757,188 @@ const OrderSummary = ({ items, subtotal }) => (
       {items.map((item) => (
         <div key={item.id} className="py-3 flex justify-between">
           <div>
-            <p>
+            <p className="font-medium">
               {item.Menu?.name} × {item.quantity}
             </p>
             <p className="text-sm text-gray-500">{item.Menu?.category}</p>
           </div>
-          <p>Rp{(item.Menu?.price * item.quantity).toLocaleString()}</p>
+          <p className="font-medium">
+            Rp{(item.Menu?.price * item.quantity).toLocaleString()}
+          </p>
         </div>
       ))}
     </div>
 
-    <div className="mt-4 pt-4 border-t border-gray-200">
-      <div className="flex justify-between font-medium mb-2">
-        <span>Subtotal:</span>
+    <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+      <div className="flex justify-between">
+        <span>Subtotal Menu:</span>
         <span>Rp{subtotal.toLocaleString()}</span>
       </div>
-      {/* <div className="flex justify-between font-medium mb-2">
-        <span>Biaya Pengiriman:</span>
-        <span>Gratis</span>
-      </div> */}
-      <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t border-gray-200">
-        <span>Total:</span>
-        <span>Rp{subtotal.toLocaleString()}</span>
+
+      <div className="flex justify-between items-center">
+        <div>
+          <span>Biaya Pengiriman:</span>
+          {deliveryInfo && (
+            <div className="text-xs text-gray-500">
+              {deliveryInfo.area_name || "Area terdeteksi"}
+            </div>
+          )}
+        </div>
+        <div className="text-right">
+          <div className="font-medium">
+            {deliveryInfo?.is_out_of_range ? (
+              <span className="text-red-600 font-bold">TIDAK TERSEDIA</span>
+            ) : deliveryFee === 0 ? (
+              <span className="text-green-600 font-bold">GRATIS</span>
+            ) : (
+              `Rp${deliveryFee.toLocaleString()}`
+            )}
+          </div>
+          {deliveryInfo?.requires_confirmation &&
+            !deliveryInfo?.is_out_of_range && (
+              <div className="text-xs text-orange-600">*Akan dikonfirmasi</div>
+            )}
+        </div>
+      </div>
+
+      {/* Enhanced warning for out of range */}
+      {(!isAddressValid || deliveryInfo?.is_out_of_range) && (
+        <div className="bg-red-50 border border-red-200 rounded p-2">
+          <p className="text-xs text-red-700">
+            🚫 Area di luar jangkauan layanan - pesanan tidak dapat diproses
+          </p>
+        </div>
+      )}
+
+      {/* {deliveryInfo?.confidence && deliveryInfo.confidence !== 'high' && !deliveryInfo?.is_out_of_range && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded p-2">
+          <p className="text-xs text-yellow-700">
+            ⚠️ Area pengiriman akan dikonfirmasi admin sebelum pemrosesan
+          </p>
+        </div>
+      )} */}
+    </div>
+
+    <div className="mt-4 pt-4 border-t border-gray-200">
+      <div className="flex justify-between font-bold text-lg">
+        <span>Total Pembayaran:</span>
+        <span
+          className={`${
+            deliveryInfo?.is_out_of_range ? "text-red-600" : "text-orange-600"
+          }`}
+        >
+          {deliveryInfo?.is_out_of_range
+            ? "TIDAK DAPAT DIPROSES"
+            : `Rp${total.toLocaleString()}`}
+        </span>
       </div>
     </div>
+
+    {/* Delivery Info Summary */}
+    {deliveryInfo && (
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <h3 className="font-medium text-gray-800 mb-2">Info Pengiriman</h3>
+        <div className="space-y-1 text-sm text-gray-600">
+          <p className={deliveryInfo.is_out_of_range ? "text-red-600" : ""}>
+            📍 {deliveryInfo.area_name}
+            {deliveryInfo.is_out_of_range && " (Di Luar Jangkauan)"}
+          </p>
+          {deliveryInfo.distance_estimate && !deliveryInfo.is_out_of_range && (
+            <p>📏 Jarak: {deliveryInfo.distance_estimate}</p>
+          )}
+          {!deliveryInfo.is_out_of_range && (
+            <p>
+              🎯 Akurasi:{" "}
+              <span className="capitalize">{deliveryInfo.confidence}</span>
+            </p>
+          )}
+        </div>
+      </div>
+    )}
+
+    {/* Service Coverage Info */}
+    <div className="mt-4 pt-4 border-t border-gray-200">
+      <h3 className="font-medium text-gray-800 mb-2">Jangkauan Layanan</h3>
+      <div className="text-sm text-gray-600 space-y-1">
+        <p>✅ Banjarnegara, Purbalingga, Wonosobo</p>
+        <p>✅ Kebumen (utara), Banyumas (utara)</p>
+        <p>✅ Purwokerto & sekitarnya</p>
+        <p className="text-red-600 text-xs mt-2">
+          🚫 Tidak melayani: Jakarta, Bandung, Semarang, Yogyakarta, Solo, dan
+          kota besar lainnya
+        </p>
+      </div>
+    </div>
+
+    {/* Payment Methods Info */}
+    {/* <div className="mt-4 pt-4 border-t border-gray-200">
+      <h3 className="font-medium text-gray-800 mb-2">Metode Pembayaran</h3>
+      <div className="text-sm text-gray-600 space-y-1">
+        <p>💳 Transfer Bank</p>
+        <p>📱 E-Wallet (DANA, OVO, GoPay)</p>
+        <p className="text-xs text-gray-500">
+          *Detail pembayaran akan diberikan setelah konfirmasi pesanan
+        </p>
+      </div>
+    </div> */}
+
+    {/* Order Process Flow
+    <div className="mt-4 pt-4 border-t border-gray-200">
+      <h3 className="font-medium text-gray-800 mb-2">Alur Pesanan</h3>
+      <div className="text-sm text-gray-600 space-y-1">
+        <div className="flex items-center space-x-2">
+          <span className="w-4 h-4 bg-blue-500 rounded-full flex-shrink-0"></span>
+          <span>Buat Pesanan</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></span>
+          <span>Konfirmasi Admin</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></span>
+          <span>Upload Bukti Bayar</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></span>
+          <span>Verifikasi Pembayaran</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></span>
+          <span>Pesanan Diproses</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></span>
+          <span>Pengiriman</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></span>
+          <span>Selesai</span>
+        </div>
+      </div>
+    </div> */}
+
+    {/* Terms and Conditions */}
+    <div className="mt-4 pt-4 border-t border-gray-200">
+      <h3 className="font-medium text-gray-800 mb-2">Syarat & Ketentuan</h3>
+      <div className="text-xs text-gray-600 space-y-1">
+        <p>• Pesanan minimal H-2 hari sebelum pengiriman</p>
+        <p>• Pembayaran maksimal 24 jam setelah konfirmasi</p>
+        <p>• Pesanan yang tidak dibayar akan dibatalkan otomatis</p>
+        {/* <p>• Harga dapat berubah sewaktu-waktu tanpa pemberitahuan</p>
+        <p>• Komplain maksimal 2 jam setelah pesanan diterima</p>
+        <p className="text-red-600 font-medium">• Layanan terbatas untuk Jawa Tengah Selatan</p> */}
+      </div>
+    </div>
+
+    {/* Contact Info
+    <div className="mt-4 pt-4 border-t border-gray-200 bg-gray-50 rounded-md p-3">
+      <h3 className="font-medium text-gray-800 mb-2">Butuh Bantuan?</h3>
+      <div className="text-sm text-gray-600 space-y-1">
+        <p>📞 WhatsApp: 081234567890</p>
+        <p>📧 Email: info@umkmbanjarnegara.com</p>
+        <p>🕒 Layanan: 07:00 - 21:00 WIB</p>
+      </div>
+    </div> */}
   </div>
 );
 
