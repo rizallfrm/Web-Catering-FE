@@ -3,6 +3,7 @@ import FAQAccordion from "../Fragments/FAQAccordion";
 import Hero from "../Fragments/Hero";
 import MenuSection from "../Fragments/MenuSection";
 import OrderProcess from "../Fragments/OrderProcess";
+import EventSection from "../Fragments/EventSection";
 import TestimonialSection from "../Fragments/TestimonialSection";
 const nomorWhatsApp = "6289527308651";
 
@@ -17,8 +18,9 @@ const Home = () => {
       <MenuSection />
       <OrderProcess />
       <FAQAccordion />
+      <EventSection />
       {/* <CateringAccordion /> */}
-      {/* <TestimonialSection />{" "} */}
+      <TestimonialSection />{" "}
       <button
         onClick={bukaWhatsApp}
         className="fixed bottom-6 right-6 flex items-center gap-2 bg-green-500 text-white px-4 py-3 rounded-full shadow-lg hover:bg-green-600 transition-all duration-300 z-50"
