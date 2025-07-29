@@ -41,7 +41,7 @@ const OrderDetailPage = () => {
     }
   }, [order]);
 
- const whatsappTemplateProcess = (order) => {
+  const whatsappTemplateProcess = (order) => {
     const orderId = order.id;
     const totalPrice = order.total_price
       ? order.total_price.toLocaleString("id-ID")
@@ -84,7 +84,6 @@ ${items}
 
 Terima kasih atas bantuannya 🙏
 `;
-
 
     // Encode to URI for WhatsApp
     return encodeURIComponent(message.trim());
@@ -305,6 +304,10 @@ Terima kasih atas bantuannya 🙏
                 <p>{order.delivery_address}</p>
               </div>
               <div>
+                <p className="text-gray-600">Area Pengiriman</p>
+                <p>{order.delivery_area}</p>
+              </div>
+              <div>
                 <p className="text-gray-600">Catatan</p>
                 <p>{order.delivery_notes || "-"}</p>
               </div>
@@ -321,6 +324,11 @@ Terima kasih atas bantuannya 🙏
                 </p>
               </div>
               <div>
+                {" "}
+                <p className="text-gray-600">Harga Ongkos Kirim</p>
+                <p className="font-bold">
+                  Rp{order.delivery_fee?.toLocaleString()}
+                </p>
                 <p className="text-gray-600">Total Pembayaran</p>
                 <p className="font-bold">
                   Rp{order.total_price?.toLocaleString()}
@@ -391,9 +399,9 @@ Terima kasih atas bantuannya 🙏
                 bukti pembayaran
               </p>
               <div className="bg-white p-4 rounded-md mb-4">
-                <p className="font-medium">Bank BCA</p>
-                <p className="text-gray-600">1234567890</p>
-                <p className="font-medium">a.n. Nama Catering Anda</p>
+                <p className="font-medium">BRI</p>
+                <p className="text-gray-600">6624-01-044571-53-2</p>
+                <p className="font-medium">a.n. Estika Hening</p>
                 <p className="text-gray-600">
                   Jumlah: Rp{order.total_price?.toLocaleString()}
                 </p>
