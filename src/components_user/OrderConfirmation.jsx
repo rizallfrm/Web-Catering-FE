@@ -454,10 +454,10 @@ Terima kasih atas bantuannya 🙏
                 <span className="font-bold">{timeLeft}</span> untuk mengupload
                 bukti pembayaran
               </p>
-              <div className="bg-white p-4 rounded-md mb-4 pl-2">
-                <p className="font-medium">Bank BCA</p>
-                <p className="text-gray-600">1234567890</p>
-                <p className="font-medium">a.n. Nama Catering Anda</p>
+              <div className="bg-white p-4 rounded-md mb-4">
+                <p className="font-medium">BRI</p>
+                <p className="text-gray-600">6624-01-044571-53-2</p>
+                <p className="font-medium">a.n. Estika Hening</p>
                 <p className="text-gray-600">
                   Jumlah: Rp{order.total_price?.toLocaleString()}
                 </p>
