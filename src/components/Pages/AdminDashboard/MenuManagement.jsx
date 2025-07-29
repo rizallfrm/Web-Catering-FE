@@ -280,7 +280,7 @@ const MenuManagement = () => {
               required
             >
               <option value="">Pilih kategori</option>
-              <option value="Harian">Harian</option>
+              {/* <option value="Harian">Harian</option> */}
               <option value="Acara">Acara</option>
               <option value="Prasmanan">Prasmanan</option>
             </select>
