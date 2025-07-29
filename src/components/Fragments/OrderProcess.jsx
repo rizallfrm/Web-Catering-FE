@@ -44,70 +44,97 @@ const OrderProcess = () => {
   const processGroups = [
     {
       title: "Pemesanan",
+      subtitle: "Pilih menu favorit Anda",
+      color: "from-orange-500 to-red-500",
+      bgColor: "bg-orange-50",
       steps: [
         {
           id: 1,
-          icon: <FaSearch className="w-6 h-6" />,
+          icon: <FaSearch className="w-7 h-7" />,
           title: "Pilih Menu",
-          description: "Lihat dan pilih menu catering favorit Anda",
+          description: "Jelajahi dan pilih menu catering favorit Anda dari berbagai kategori yang tersedia",
+          detail: "📱 Browse menu online",
+          color: "bg-orange-500"
         },
         {
           id: 2,
-          icon: <FaShoppingCart className="w-6 h-6" />,
+          icon: <FaShoppingCart className="w-7 h-7" />,
           title: "Keranjang",
-          description: "Tambahkan makanan ke keranjang belanja",
+          description: "Tambahkan makanan ke keranjang dan sesuaikan jumlah porsi yang dibutuhkan",
+          detail: "🛒 Atur jumlah porsi",
+          color: "bg-orange-600"
         },
         {
           id: 3,
-          icon: <FaCheckCircle className="w-6 h-6" />,
+          icon: <FaCheckCircle className="w-7 h-7" />,
           title: "Checkout",
-          description: "Lengkapi detail pengiriman & pembayaran",
+          description: "Lengkapi detail pengiriman, tanggal acara, dan informasi pembayaran",
+          detail: "📝 Isi detail lengkap",
+          color: "bg-orange-700"
         },
       ],
     },
     {
       title: "Konfirmasi",
+      subtitle: "Proses verifikasi pesanan",
+      color: "from-blue-500 to-purple-500",
+      bgColor: "bg-blue-50",
       steps: [
         {
           id: 4,
-          icon: <FaWhatsapp className="w-6 h-6" />,
+          icon: <FaWhatsapp className="w-7 h-7" />,
           title: "Konfirmasi",
-          description: "Admin akan memverifikasi pesanan Anda",
+          description: "Admin akan menghubungi Anda via WhatsApp untuk memverifikasi pesanan",
+          detail: "💬 Konfirmasi via WA",
+          color: "bg-blue-500"
         },
         {
           id: 5,
-          icon: <FaMoneyBillWave className="w-6 h-6" />,
+          icon: <FaMoneyBillWave className="w-7 h-7" />,
           title: "Pembayaran",
-          description: "Upload bukti transfer pembayaran",
+          description: "Lakukan pembayaran dan upload bukti transfer melalui sistem kami",
+          detail: "💳 Transfer & upload bukti",
+          color: "bg-blue-600"
         },
         {
           id: 6,
-          icon: <FaClock className="w-6 h-6" />,
+          icon: <FaClock className="w-7 h-7" />,
           title: "Verifikasi",
-          description: "Tim kami akan memvalidasi pembayaran",
+          description: "Tim kami akan memvalidasi pembayaran dalam waktu maksimal 2 jam",
+          detail: "✅ Validasi pembayaran",
+          color: "bg-blue-700"
         },
       ],
     },
     {
       title: "Pengiriman",
+      subtitle: "Persiapan hingga pengantaran",
+      color: "from-green-500 to-teal-500",
+      bgColor: "bg-green-50",
       steps: [
         {
           id: 7,
-          icon: <FaUtensils className="w-6 h-6" />,
+          icon: <FaUtensils className="w-7 h-7" />,
           title: "Persiapan",
-          description: "Pesanan sedang disiapkan oleh tim kami",
+          description: "Tim chef kami mulai menyiapkan pesanan dengan bahan-bahan segar pilihan",
+          detail: "👨‍🍳 Memasak dengan cinta",
+          color: "bg-green-500"
         },
         {
           id: 8,
-          icon: <FaTruck className="w-6 h-6" />,
+          icon: <FaTruck className="w-7 h-7" />,
           title: "Pengantaran",
-          description: "Pesanan dikirim ke alamat Anda",
+          description: "Pesanan dikemas dengan rapi dan dikirim tepat waktu ke alamat Anda",
+          detail: "🚚 Antar tepat waktu",
+          color: "bg-green-600"
         },
         {
           id: 9,
-          icon: <FaBoxOpen className="w-6 h-6" />,
+          icon: <FaBoxOpen className="w-7 h-7" />,
           title: "Selesai",
-          description: "Pesanan telah sampai dengan selamat",
+          description: "Pesanan telah sampai dengan selamat dan siap untuk dinikmati",
+          detail: "🎉 Nikmati hidangan",
+          color: "bg-green-700"
         },
       ],
     },
@@ -116,61 +143,97 @@ const OrderProcess = () => {
   return (
     <section
       id="order-process-section"
-      className="py-16 md:py-24 px-4 bg-gradient-to-br from-amber-50 to-white"
+      className="py-20 px-4 bg-gradient-to-br from-orange-50 via-white to-red-50 relative overflow-hidden"
     >
-      <div className="max-w-6xl mx-auto">
+      {/* Background decorations */}
+      <div className="absolute top-20 left-10 w-20 h-20 bg-orange-200/30 rounded-full animate-pulse"></div>
+      <div className="absolute bottom-20 right-10 w-32 h-32 bg-red-200/30 rounded-full animate-pulse delay-1000"></div>
+      <div className="absolute top-40 right-20 w-16 h-16 bg-green-200/30 rounded-full animate-pulse delay-2000"></div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header Section */}
-        <div className="text-center mb-12 md:mb-16">
-          <p className="text-amber-600 font-medium mb-2">Proses Mudah</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-            Cara Memesan Catering
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center px-6 py-3 bg-orange-500 text-white rounded-full font-medium mb-6 shadow-lg">
+            <span className="mr-2">🎯</span>
+            Proses Mudah & Cepat
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+            <span className="text-orange-600">Cara</span> <span className="text-red-600">Memesan</span> <span className="text-green-600">Catering</span>
           </h2>
-          <div className="w-20 h-1 bg-amber-500 mx-auto mb-6"></div>
-          <p className="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
-            Proses pemesanan dalam 3 tahap sederhana
+          <div className="flex justify-center items-center gap-2 mb-8">
+            <div className="w-12 h-1 bg-orange-500 rounded"></div>
+            <div className="w-6 h-1 bg-red-500 rounded"></div>
+            <div className="w-12 h-1 bg-green-600 rounded"></div>
+          </div>
+          <p className="text-gray-600 max-w-3xl mx-auto text-lg">
+            Hanya dengan 3 langkah mudah, Anda sudah bisa menikmati hidangan catering berkualitas 
+            dari Dapur Mamake untuk acara spesial Anda
           </p>
         </div>
 
         {/* Desktop Timeline View */}
-        <div className="hidden md:block">
-          <div className="space-y-12">
+        <div className="hidden lg:block">
+          <div className="space-y-20">
             {processGroups.map((group, groupIndex) => (
-              <div key={groupIndex} className="mb-12">
-                <h3 className="text-xl font-bold text-gray-800 mb-6 text-center">
-                  {groupIndex + 1}. {group.title}
-                </h3>
-                <div className="grid grid-cols-3 gap-6">
-                  {group.steps.map((step) => (
+              <div key={groupIndex} className={`${group.bgColor} rounded-3xl p-8 shadow-xl border border-gray-100`}>
+                <div className="text-center mb-12">
+                  <div className={`inline-block bg-gradient-to-r ${group.color} text-white px-8 py-4 rounded-2xl shadow-lg mb-4`}>
+                    <h3 className="text-2xl font-bold">
+                      Tahap {groupIndex + 1}: {group.title}
+                    </h3>
+                    <p className="text-sm opacity-90 mt-1">{group.subtitle}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-8">
+                  {group.steps.map((step, stepIndex) => (
                     <div
                       key={step.id}
-                      className="flex flex-col items-center"
+                      className="flex flex-col items-center relative"
                       onMouseEnter={() => setActiveStep(step.id)}
                     >
+                      {/* Connecting line */}
+                      {stepIndex < group.steps.length - 1 && (
+                        <div className="absolute top-10 left-1/2 w-full h-1 bg-gray-200 z-0">
+                          <div className={`h-full transition-all duration-1000 ${
+                            activeStep >= step.id ? step.color : 'bg-gray-200'
+                          } bg-gradient-to-r`} style={{width: activeStep > step.id ? '100%' : '0%'}}></div>
+                        </div>
+                      )}
+
+                      {/* Icon */}
                       <div
-                        className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-300 ${
+                        className={`relative z-10 w-20 h-20 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500 shadow-lg ${
                           activeStep === step.id
-                            ? "bg-amber-500 text-white scale-105 shadow-lg"
-                            : "bg-white text-gray-600 border-2 border-gray-300"
+                            ? `${step.color} text-white scale-110 shadow-xl`
+                            : "bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300"
                         }`}
                       >
                         {step.icon}
                       </div>
+
+                      {/* Content Card */}
                       <div
-                        className={`bg-white p-6 rounded-lg shadow-md w-full text-center transition-all duration-300 min-h-[180px] border-t-4 ${
+                        className={`bg-white rounded-2xl shadow-lg w-full text-center transition-all duration-500 min-h-[220px] p-6 border-2 ${
                           activeStep === step.id
-                            ? "border-amber-500 transform -translate-y-2 shadow-lg"
-                            : "border-gray-200"
+                            ? "border-orange-300 transform -translate-y-4 shadow-2xl"
+                            : "border-gray-100 hover:border-gray-200"
                         }`}
                       >
-                        <h4 className="font-bold text-lg mb-2 text-gray-800">
+                        <h4 className="font-bold text-xl mb-3 text-gray-800">
                           {step.title}
                         </h4>
-                        <p className="text-gray-600 text-sm">
+                        <p className="text-gray-600 text-sm leading-relaxed mb-4">
                           {step.description}
                         </p>
+                        <div className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-medium ${
+                          activeStep === step.id ? `${step.color} text-white` : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {step.detail}
+                        </div>
                         {activeStep === step.id && (
                           <div className="mt-4">
-                            <span className="inline-block w-8 h-1 rounded-full bg-amber-500"></span>
+                            <div className="w-12 h-1 bg-orange-500 mx-auto rounded-full"></div>
                           </div>
                         )}
                       </div>
@@ -182,44 +245,49 @@ const OrderProcess = () => {
           </div>
         </div>
 
-        {/* Mobile Carousel View */}
-        <div className="md:hidden">
-          <div className="space-y-8">
+        {/* Mobile View */}
+        <div className="lg:hidden">
+          <div className="space-y-12">
             {processGroups.map((group, groupIndex) => (
-              <div key={groupIndex} className="mb-8">
-                <h3 className="text-lg font-bold text-gray-800 mb-4 pl-2">
-                  {groupIndex + 1}. {group.title}
-                </h3>
-                <div className="flex overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4">
+              <div key={groupIndex} className={`${group.bgColor} rounded-2xl p-6 shadow-lg`}>
+                <div className={`bg-gradient-to-r ${group.color} text-white text-center py-4 px-6 rounded-xl mb-8 shadow-lg`}>
+                  <h3 className="text-lg font-bold">
+                    Tahap {groupIndex + 1}: {group.title}
+                  </h3>
+                  <p className="text-sm opacity-90">{group.subtitle}</p>
+                </div>
+
+                <div className="space-y-6">
                   {group.steps.map((step) => (
                     <div
                       key={step.id}
-                      className="flex-shrink-0 w-10/12 snap-center px-2"
+                      className={`bg-white rounded-xl shadow-md p-6 border-l-4 ${
+                        activeStep === step.id ? 'border-orange-500 shadow-lg' : 'border-gray-200'
+                      }`}
                     >
-                      <div
-                        className={`bg-white p-6 rounded-xl shadow-md h-full border-l-4 ${
-                          activeStep === step.id
-                            ? "border-amber-500"
-                            : "border-gray-200"
-                        }`}
-                      >
-                        <div className="flex items-center mb-4">
-                          <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center mr-4 ${
-                              activeStep === step.id
-                                ? "bg-amber-500 text-white"
-                                : "bg-gray-200 text-gray-600"
-                            }`}
-                          >
-                            {step.icon}
-                          </div>
-                          <h4 className="font-bold text-gray-800">
+                      <div className="flex items-start">
+                        <div
+                          className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 flex-shrink-0 ${
+                            activeStep === step.id
+                              ? `${step.color} text-white shadow-lg`
+                              : "bg-gray-100 text-gray-600"
+                          }`}
+                        >
+                          {step.icon}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-gray-800 mb-2">
                             {step.title}
                           </h4>
+                          <p className="text-gray-600 text-sm mb-3">
+                            {step.description}
+                          </p>
+                          <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                            activeStep === step.id ? `${step.color} text-white` : 'bg-gray-100 text-gray-600'
+                          }`}>
+                            {step.detail}
+                          </div>
                         </div>
-                        <p className="text-gray-600 text-sm pl-14 -mt-2">
-                          {step.description}
-                        </p>
                       </div>
                     </div>
                   ))}
@@ -228,6 +296,28 @@ const OrderProcess = () => {
             ))}
           </div>
         </div>
+
+        {/* Call to Action */}
+        {/* <div className="mt-20 text-center">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-gray-100">
+            <div className="text-6xl mb-6">🚀</div>
+            <h3 className="text-3xl font-bold text-gray-800 mb-4">
+              Siap untuk <span className="text-orange-600">Memesan</span>?
+            </h3>
+            <p className="text-gray-600 max-w-2xl mx-auto mb-8 text-lg">
+              Proses pemesanan yang mudah dan cepat menanti Anda. 
+              Mulai pilih menu favorit Anda sekarang juga!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                🍽️ Pilih Menu Sekarang
+              </button>
+              <button className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                💬 Chat WhatsApp
+              </button>
+            </div>
+          </div>
+        </div> */}
       </div>
     </section>
   );
