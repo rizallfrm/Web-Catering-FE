@@ -13,7 +13,8 @@ import MenuService from "../../services/menuService";
 import MenuManagement from "./MenuManagement";
 import UserManagement from "./UserManagement";
 import OrderManagement from "./OrderManagement";
-// import OrderManagement from './admin/OrderManagement';
+import FinancialManagement from "../AdminDashboard/Financial/FinancialManagement";
+import ExpenseManagement from "../AdminDashboard/Financial/ExpenseManagement";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -33,6 +34,8 @@ const AdminDashboard = () => {
     if (path === "menu") setActiveTab("menu");
     else if (path === "orders") setActiveTab("orders");
     else if (path === "users") setActiveTab("users");
+    else if (path === "financial") setActiveTab("financial");
+    else if (path === "expenses") setActiveTab("expenses");
     else setActiveTab("dashboard");
   }, [location.pathname]);
 
@@ -97,7 +100,7 @@ const AdminDashboard = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               <div className="bg-blue-100 p-4 rounded-lg shadow-sm">
                 <h3 className="font-medium text-blue-800">Pesanan</h3>
                 <p className="text-2xl font-bold">
@@ -128,6 +131,46 @@ const AdminDashboard = () => {
                   </span>{" "}
                   pengguna baru dalam 7 hari terakhir
                 </p>
+              </div>
+              <div className="bg-yellow-100 p-4 rounded-lg shadow-sm">
+                <h3 className="font-medium text-yellow-800">Keuangan</h3>
+                <p className="text-lg font-bold">Laporan Lengkap</p>
+                <button
+                onClick={() => {
+                  setActiveTab("expenses");
+                  navigate("/admin/expenses");
+                }}
+                className={`flex items-center px-4 py-3 text-left ${
+                  activeTab === "expenses"
+                    ? "bg-yellow-500 text-white"
+                    : "hover:bg-yellow-50"
+                }`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+                Kelola Pengeluaran
+              </button>
+              <button
+                  onClick={() => {
+                    setActiveTab("espenses");
+                    navigate("/admin/expenses");
+                  }}
+                  className="text-sm text-yellow-600 hover:text-yellow-800 underline"
+                >
+                  Lihat Detail →
+                </button>
               </div>
             </div>
 
@@ -217,26 +260,6 @@ const AdminDashboard = () => {
       </div>
     );
   };
-  // Komponen Placeholder untuk Order Management
-  const OrderManagementPlaceholder = () => (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-4">Kelola Pesanan</h2>
-      <p className="text-gray-500">
-        Implementasi manajemen pesanan akan ditambahkan di sini.
-      </p>
-      {/* Nanti akan diganti dengan komponen OrderManagement sebenarnya */}
-    </div>
-  );
-
-  // Komponen Placeholder untuk User Management
-  const UserManagementPlaceholder = () => (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-4">Kelola Pengguna</h2>
-      <p className="text-gray-500">
-        Implementasi manajemen pengguna akan ditambahkan di sini.
-      </p>
-    </div>
-  );
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -358,6 +381,60 @@ const AdminDashboard = () => {
               </button>
               <button
                 onClick={() => {
+                  setActiveTab("financial");
+                  navigate("/admin/financial");
+                }}
+                className={`flex items-center px-4 py-3 text-left ${
+                  activeTab === "financial"
+                    ? "bg-yellow-500 text-white"
+                    : "hover:bg-yellow-50"
+                }`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Laporan Keuangan
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab("expenses");
+                  navigate("/admin/expenses");
+                }}
+                className={`flex items-center px-4 py-3 text-left ${
+                  activeTab === "expenses"
+                    ? "bg-yellow-500 text-white"
+                    : "hover:bg-yellow-50"
+                }`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Laporan Pengeluaran
+              </button>
+              <button
+                onClick={() => {
                   setActiveTab("users");
                   navigate("/admin/users");
                 }}
@@ -416,6 +493,8 @@ const AdminDashboard = () => {
             <Route path="/" element={<DashboardContent />} />
             <Route path="/menu" element={<MenuManagement />} />
             <Route path="/orders" element={<OrderManagement />} />
+            <Route path="/financial" element={<FinancialManagement />} />
+            <Route path="/expenses" element={<ExpenseManagement />} />
             <Route path="/users" element={<UserManagement />} />
           </Routes>
 
