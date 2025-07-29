@@ -503,6 +503,14 @@ const OrderManagement = () => {
                         {selectedOrder.delivery_address}
                       </p>
                     </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">
+                        Area Pengiriman
+                      </p>
+                      <p className="font-medium">
+                        {selectedOrder.delivery_area}
+                      </p>
+                    </div>
 
                     <div>
                       <p className="text-sm text-gray-500 mb-1">
@@ -527,6 +535,14 @@ const OrderManagement = () => {
                       <p className="text-xl font-bold text-gray-800">
                         Rp{" "}
                         {selectedOrder.total_price?.toLocaleString("id-ID") ||
+                          "0"}
+                      </p>
+                      <p className="text-sm text-gray-500 mb-1 pt-2">
+                        Harga Ongkos Kirim
+                      </p>
+                      <p className="text-xl font-bold text-gray-800">
+                        Rp{" "}
+                        {selectedOrder.delivery_fee?.toLocaleString("id-ID") ||
                           "0"}
                       </p>
                     </div>
@@ -678,6 +694,19 @@ const OrderManagement = () => {
                       )}
                     </tbody>
                     <tfoot className="bg-gray-50">
+                      <tr>
+                        <th
+                          colSpan="3"
+                          className="px-6 py-3 text-right text-sm font-medium text-gray-500"
+                        >
+                          Biaya Ongkos Kirim
+                        </th>
+                        <th className="px-6 py-3 text-right text-sm font-medium text-gray-900">
+                          Rp{" "}
+                          {selectedOrder.delivery_fee?.toLocaleString("id-ID") ||
+                            "0"}
+                        </th>
+                      </tr>
                       <tr>
                         <th
                           colSpan="3"
